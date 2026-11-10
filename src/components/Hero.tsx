@@ -129,8 +129,8 @@ export const Hero: React.FC<HeroProps> = ({
             {dict?.heroEyebrow || 'GLOBAL WILDLIFE INTELLIGENCE'}
           </div>
 
-          {/* Cormorant Garamond Main Headline: Bold & Clean */}
-          <h1 className={`font-serif text-3xl sm:text-4xl lg:text-[46px] xl:text-[52px] font-bold leading-[1.08] tracking-tight ${
+          {/* Cormorant Garamond Main Headline: Bold & Clean (Size increased by 2px per user request) */}
+          <h1 className={`font-serif text-[32px] sm:text-[38px] lg:text-[48px] xl:text-[54px] font-bold leading-[1.08] tracking-tight ${
             darkMode ? 'text-white' : 'text-[#0B3A4A]'
           }`}>
             {dict?.heroTitleLine1 || 'Protect the wild.'}
@@ -274,12 +274,8 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Right helper text */}
-        <div className={`text-right hidden sm:block text-[10px] font-semibold tracking-wider uppercase ${
-          darkMode ? 'text-[#8AAFB8]' : 'text-[#6E8890]'
-        }`}>
-          Interactive 3D Earth
-        </div>
+        {/* Spacer to keep center Atmosphere dock balanced (Interactive 3D Earth text removed per user request) */}
+        <div className="hidden sm:block w-28 pointer-events-none" />
       </div>
     </section>
   );
