@@ -188,18 +188,18 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({
     <section id="detect" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Eyebrow & Headline in Coralis Aesthetic */}
       <div className="text-center max-w-3xl mx-auto mb-14">
-        <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-xs uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
+        <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-[14px] uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
           AI Intelligence Engine
         </span>
-        <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
+        <h2 className="font-serif text-[40px] sm:text-[52px] lg:text-[64px] text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
           Wildlife Trade <span className="italic text-[#FF7E6B] font-extrabold">Detection</span>
         </h2>
-        <p className="mt-4 text-base sm:text-lg text-[#3A5A64] leading-relaxed">
+        <p className="mt-4 text-[18px] sm:text-[21px] text-[#3A5A64] leading-relaxed">
           Submit suspicious social media posts or online listings. Our computer vision and multimodal intelligence system detects species taxonomy, disguised trafficking lexicons, and illicit trade signatures.
         </p>
 
         {/* Engine Transparency Pill */}
-        <div className="mt-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-[#1FB6C9]/20 text-xs text-[#3A5A64] shadow-sm">
+        <div className="mt-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-[#1FB6C9]/20 text-[14px] text-[#3A5A64] shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#1FB6C9]" />
           <span>
             Active Architecture: <strong className="text-[#0B3A4A]">{apiKey ? 'Gemini 1.5 Multimodal Vision API' : 'Production Heuristic Engine (Demo Mode)'}</strong>

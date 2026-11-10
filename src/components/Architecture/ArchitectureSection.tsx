@@ -29,21 +29,21 @@ export const ArchitectureSection: React.FC<ArchitectureSectionProps> = ({ darkMo
         
         {/* HEADER SECTION (Matching User Reference Image) */}
         <div className="text-center space-y-4 pt-4">
-          <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest shadow-sm ${
+          <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[14px] font-bold uppercase tracking-widest shadow-sm ${
             darkMode ? 'bg-[#0B2533] border-[#1FB6C9]/30 text-[#9BF0FB]' : 'bg-white border-[#2F7D58]/40 text-[#1E6544]'
           }`}>
             <span className="w-2 h-2 rounded-full bg-[#2F7D58] animate-pulse" />
             AI ARCHITECTURE & SCIENTIFIC INTELLIGENCE
           </div>
 
-          {/* Main Heading Bold per User Request: "main heading ko bold" */}
-          <h1 className={`font-serif text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight ${
+          {/* Main Heading Bold per User Request */}
+          <h1 className={`font-serif text-[40px] sm:text-[52px] lg:text-[64px] font-bold leading-tight tracking-tight ${
             darkMode ? 'text-white' : 'text-[#0B3A4A]'
           }`}>
             Research & <span className="italic font-bold text-[#1E6544] dark:text-[#9BF0FB]">Implementation</span>
           </h1>
 
-          <p className={`text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-sans font-medium ${
+          <p className={`text-[17px] sm:text-[19px] max-w-2xl mx-auto leading-relaxed font-sans font-medium ${
             darkMode ? 'text-[#CBD5E1]' : 'text-[#334155]'
           }`}>
             Technical architecture and data-driven solutions for systemic illegal wildlife trade monitoring and autonomous interdiction.
@@ -52,7 +52,7 @@ export const ArchitectureSection: React.FC<ArchitectureSectionProps> = ({ darkMo
 
         {/* SECTION 1: THE REALITY OF GLOBAL WILDLIFE CRIME (4 Metric Boxes) */}
         <div className="space-y-6">
-          <h2 className={`text-center font-serif text-2xl sm:text-3xl font-bold tracking-tight ${
+          <h2 className={`text-center font-serif text-[27px] sm:text-[34px] font-bold tracking-tight ${
             darkMode ? 'text-white' : 'text-[#0B3A4A]'
           }`}>
             The Reality of Global Wildlife Crime

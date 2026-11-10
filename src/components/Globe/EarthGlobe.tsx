@@ -44,15 +44,15 @@ function createLabelSprite(
 ): THREE.Sprite {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-  canvas.width = 360;
-  canvas.height = 76;
-  ctx.font = 'bold 22px Manrope, sans-serif';
+  canvas.width = 380;
+  canvas.height = 80;
+  ctx.font = 'bold 25px Manrope, sans-serif';
   const textWidth = ctx.measureText(text).width;
   
-  const dotSize = 8;
+  const dotSize = 9;
   const paddingX = 18;
-  const pillW = Math.min(340, textWidth + paddingX * 2 + dotSize + 12);
-  const pillH = 42;
+  const pillW = Math.min(360, textWidth + paddingX * 2 + dotSize + 14);
+  const pillH = 46;
   const startX = (canvas.width - pillW) / 2;
   const startY = (canvas.height - pillH) / 2;
 
@@ -61,7 +61,7 @@ function createLabelSprite(
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.roundRect(startX, startY, pillW, pillH, 21);
+  ctx.roundRect(startX, startY, pillW, pillH, 23);
   ctx.fill();
   ctx.stroke();
 
@@ -111,7 +111,7 @@ function createLabelSprite(
     transparent: true
   });
   const sprite = new THREE.Sprite(spriteMat);
-  sprite.scale.set(0.38, 0.08, 1);
+  sprite.scale.set(0.40, 0.086, 1);
   sprite.position.y = 0.062;
   return sprite;
 }
@@ -821,14 +821,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       )}
 
-      {/* Layer Visibility & Quick Region Jumpers (Top Right) */}
+      {/* Layer Visibility & Quick Region Jumpers (Top Right, text increased by 3px) */}
       <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
-        <div className="bg-white/85 backdrop-blur-md p-1.5 rounded-full border border-[#1FB6C9]/25 shadow-sm flex items-center gap-1.5 text-xs">
+        <div className="bg-white/85 backdrop-blur-md p-1.5 rounded-full border border-[#1FB6C9]/25 shadow-sm flex items-center gap-1.5 text-[14px]">
           <button
             onClick={() => setShowHotspots(!showHotspots)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
               showHotspots
-                ? 'bg-[#E4F4F5] text-[#0B3A4A] border border-[#1FB6C9]/30'
+                ? 'bg-[#E4F4F5] text-[#0B3A4A] border border-[#1FB6C9]/30 font-semibold'
                 : 'text-gray-400'
             }`}
           >
@@ -839,7 +839,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             onClick={() => setShowIncidents(!showIncidents)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
               showIncidents
-                ? 'bg-[#FF7E6B]/15 text-[#E86350] border border-[#FF7E6B]/30'
+                ? 'bg-[#FF7E6B]/15 text-[#E86350] border border-[#FF7E6B]/30 font-semibold'
                 : 'text-gray-400'
             }`}
           >
@@ -848,29 +848,29 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           </button>
         </div>
 
-        {/* Quick Continent Fly-To */}
+        {/* Quick Continent Fly-To (Text increased by 3px) */}
         <div className="hidden sm:flex flex-wrap justify-end gap-1 max-w-xs">
           <button
             onClick={() => jumpToRegion(16.5, 101.0)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[13px] font-semibold px-3 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Indo-Burma
           </button>
           <button
             onClick={() => jumpToRegion(-18.7, 46.8)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[13px] font-semibold px-3 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Madagascar
           </button>
           <button
             onClick={() => jumpToRegion(-0.8, 113.9)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[13px] font-semibold px-3 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Sundaland
           </button>
           <button
             onClick={() => jumpToRegion(-9.2, -75.0)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[13px] font-semibold px-3 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Andes
           </button>
@@ -902,14 +902,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </button>
       </div>
 
-      {/* Telemetry & Auto-Rotate Toggle (Top-Left of Globe container) */}
+      {/* Telemetry & Auto-Rotate Toggle (Top-Left of Globe container, text increased by 3px) */}
       <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-        <div className="bg-[#0B3A4A]/85 backdrop-blur-md text-[#E4F4F5] text-[10px] px-3 py-1 rounded-full border border-white/10 font-mono shadow-sm">
+        <div className="bg-[#0B3A4A]/85 backdrop-blur-md text-[#E4F4F5] text-[13px] px-3.5 py-1.5 rounded-full border border-white/10 font-mono shadow-sm">
           {coords.lat >= 0 ? `${coords.lat}°N` : `${Math.abs(coords.lat)}°S`}, {coords.lng >= 0 ? `${coords.lng}°E` : `${Math.abs(coords.lng)}°W`}
         </div>
         <button
           onClick={() => setIsRotating(!isRotating)}
-          className="bg-white/85 dark:bg-[#0B2533]/85 hover:bg-white text-[#0B3A4A] dark:text-[#E4F4F5] text-[10px] font-semibold px-2.5 py-1 rounded-full border border-gray-200 dark:border-[#1FB6C9]/20 shadow-sm cursor-pointer"
+          className="bg-white/85 dark:bg-[#0B2533]/85 hover:bg-white text-[#0B3A4A] dark:text-[#E4F4F5] text-[13px] font-semibold px-3 py-1.5 rounded-full border border-gray-200 dark:border-[#1FB6C9]/20 shadow-sm cursor-pointer"
         >
           {isRotating ? 'Pause' : 'Rotate'}
         </button>

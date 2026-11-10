@@ -83,13 +83,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records,
       {/* Editorial Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-          <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-xs uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-[14px] uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
             Real-Time Analytics & Enforcement Telemetry
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
+          <h2 className="font-serif text-[40px] sm:text-[52px] text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
             Intelligence <span className="italic text-[#1FB6C9] font-extrabold">Dashboard</span>
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-[#3A5A64]">
+          <p className="mt-2 text-[17px] sm:text-[19px] text-[#3A5A64]">
             Aggregated metrics derived from live content scanning, verified seizures, and CITES compliance investigations.
           </p>
         </div>
@@ -98,7 +98,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records,
           {onNavigateToDetect && (
             <button
               onClick={onNavigateToDetect}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-xs font-semibold shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-[14px] font-semibold shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
               New Content Detection

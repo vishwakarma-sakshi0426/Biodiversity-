@@ -91,12 +91,12 @@ export const Navigation: React.FC<NavigationProps> = ({
             <Globe2 className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className={`font-serif text-2xl font-semibold tracking-tight leading-none block ${
+            <span className={`font-serif text-[27px] font-semibold tracking-tight leading-none block ${
               darkMode ? 'text-white' : 'text-[#0B3A4A]'
             }`}>
               WILD<span className="text-[#1FB6C9]">INTEL</span>
             </span>
-            <span className={`text-[9px] uppercase tracking-widest font-bold block mt-0.5 ${
+            <span className={`text-[12px] uppercase tracking-widest font-bold block mt-0.5 ${
               darkMode ? 'text-[#9BF0FB]' : 'text-[#6E8890]'
             }`}>
               {dict?.brandSubtitle || 'Global Wildlife Intelligence'}
@@ -116,7 +116,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               <button
                 key={link.page}
                 onClick={() => handleLinkClick(link.page)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[14px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   isActive
                     ? darkMode
                       ? 'bg-[#1FB6C9] text-white shadow-md shadow-[#1FB6C9]/30'
@@ -127,7 +127,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 }`}
               >
                 {link.icon && (
-                  <link.icon className={`w-3.5 h-3.5 ${
+                  <link.icon className={`w-4 h-4 ${
                     isActive ? (darkMode ? 'text-white' : 'text-[#9BF0FB]') : 'text-[#1FB6C9]'
                   }`} />
                 )}
@@ -144,14 +144,14 @@ export const Navigation: React.FC<NavigationProps> = ({
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[14px] font-semibold border transition-all cursor-pointer shadow-xs ${
                 darkMode
                   ? 'bg-[#0B2533] border-[#1FB6C9]/30 text-[#E4F4F5] hover:bg-[#123648]'
                   : 'bg-white/80 border-[#1FB6C9]/25 text-[#0B3A4A] hover:bg-white'
               }`}
               title="Select Language"
             >
-              <Languages className="w-3.5 h-3.5 text-[#1FB6C9]" />
+              <Languages className="w-4 h-4 text-[#1FB6C9]" />
               <span>{currentLangObj.flag} {currentLangObj.code.toUpperCase()}</span>
             </button>
 
@@ -202,18 +202,18 @@ export const Navigation: React.FC<NavigationProps> = ({
           {currentPage !== 'detect' ? (
             <button
               onClick={() => handleLinkClick('detect')}
-              className="px-5 py-2.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-xs font-bold uppercase tracking-wider shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-[14px] font-bold uppercase tracking-wider shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-4 h-4" />
               {dict?.ctaDetect || 'AI Detection Tool'}
             </button>
           ) : (
             <button
               onClick={() => handleLinkClick('dashboard')}
-              className="px-5 py-2.5 rounded-full bg-[#1FB6C9] hover:bg-[#1693A3] text-white text-xs font-bold uppercase tracking-wider shadow-md shadow-[#1FB6C9]/30 transition-all hover:scale-105 flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-[#1FB6C9] hover:bg-[#1693A3] text-white text-[14px] font-bold uppercase tracking-wider shadow-md shadow-[#1FB6C9]/30 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
             >
-              <BarChart3 className="w-3.5 h-3.5" />
-              {dict?.ctaAnalytics || 'View Analytics'}
+              <BarChart3 className="w-4 h-4" />
+              {dict?.ctaAnalytics || 'Intelligence Dashboard'}
             </button>
           )}
         </div>
