@@ -189,8 +189,8 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({
         <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-xs uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
           AI Intelligence Engine
         </span>
-        <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#0B3A4A] font-medium leading-tight">
-          Wildlife Trade <span className="italic text-[#FF7E6B]">Detection</span>
+        <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#0B3A4A] font-bold leading-tight tracking-tight">
+          Wildlife Trade <span className="italic text-[#FF7E6B] font-bold">Detection</span>
         </h2>
         <p className="mt-4 text-base sm:text-lg text-[#3A5A64] leading-relaxed">
           Submit suspicious social media posts or online listings. Our computer vision and multimodal intelligence system detects species taxonomy, disguised trafficking lexicons, and illicit trade signatures.

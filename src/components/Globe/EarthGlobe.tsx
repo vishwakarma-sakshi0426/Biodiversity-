@@ -156,16 +156,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   const dragDeltaAccumulatorRef = useRef<number>(0);
   const previousMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   
-  // Safe Camera Distance & Balanced Earth Size so it NEVER clips or gets cut off
-  const MIN_CAMERA_DIST = 2.45;
-  const MAX_CAMERA_DIST = 4.6;
+  // Safe Camera Distance & Balanced Earth Size so it fills the screen as much as possible but NEVER clips or cuts flat
+  const MIN_CAMERA_DIST = 3.15;
+  const MAX_CAMERA_DIST = 4.3;
   const DEFAULT_CAMERA_DIST = 3.55;
 
   const targetCameraDistanceRef = useRef<number>(DEFAULT_CAMERA_DIST);
   const currentCameraDistanceRef = useRef<number>(DEFAULT_CAMERA_DIST);
-  const targetRotationRef = useRef<{ x: number; y: number }>({ x: 0.22, y: -0.6 });
+  const targetRotationRef = useRef<{ x: number; y: number }>({ x: 0.18, y: -0.6 });
 
-  const GLOBE_RADIUS = 1.30;
+  const GLOBE_RADIUS = 1.25;
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -177,8 +177,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
-    camera.position.set(0, 0.12, currentCameraDistanceRef.current);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    // Centered vertically so top and bottom never clip
+    camera.position.set(0, 0, currentCameraDistanceRef.current);
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({
@@ -198,8 +199,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     earthGroupRef.current = earthGroup;
     earthGroup.rotation.x = targetRotationRef.current.x;
     earthGroup.rotation.y = targetRotationRef.current.y;
-    // Offset Earth slightly to the right (User Request: "thoda sa right mein ho")
-    earthGroup.position.x = 0.22;
+    // Balanced Earth position so it fills the screen without right/left edge clipping
+    earthGroup.position.x = 0.08;
+    earthGroup.position.y = 0;
 
     // Earth Sphere
     const earthGeometry = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
@@ -535,11 +537,11 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   };
 
   const handleZoomIn = () => {
-    targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, targetCameraDistanceRef.current - 0.35);
+    targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, targetCameraDistanceRef.current - 0.22);
   };
 
   const handleZoomOut = () => {
-    targetCameraDistanceRef.current = Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + 0.35);
+    targetCameraDistanceRef.current = Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + 0.22);
   };
 
   const handleReset = () => {

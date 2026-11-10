@@ -210,8 +210,8 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Prominent 3D Earth (Calibrated height so it fits within single screen) */}
-        <div className="lg:col-span-7 relative h-[50vh] sm:h-[56vh] lg:h-[62vh] max-h-[520px] w-full flex items-center justify-center lg:translate-x-4 overflow-visible">
+        {/* Right Column: Prominent 3D Earth (Calibrated so it fills the screen without clipping) */}
+        <div className="lg:col-span-7 relative h-[52vh] sm:h-[58vh] lg:h-[64vh] max-h-[540px] w-full flex items-center justify-center lg:translate-x-3 overflow-visible">
           <div className="w-full h-full relative bg-transparent overflow-visible">
             <EarthGlobe
               hotspots={hotspots}

@@ -116,7 +116,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               <button
                 key={link.page}
                 onClick={() => handleLinkClick(link.page)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   isActive
                     ? darkMode
                       ? 'bg-[#1FB6C9] text-white shadow-md shadow-[#1FB6C9]/30'
@@ -250,7 +250,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               key={link.page}
               onClick={() => handleLinkClick(link.page)}
-              className={`block w-full text-left py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-2.5 ${
+              className={`block w-full text-left py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2.5 ${
                 currentPage === link.page
                   ? 'bg-[#1FB6C9] text-white'
                   : darkMode ? 'hover:bg-white/10' : 'hover:bg-white/60'
