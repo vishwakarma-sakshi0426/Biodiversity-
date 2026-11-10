@@ -116,9 +116,9 @@ export const Hero: React.FC<HeroProps> = ({
       </div>
 
       {/* Main Grid: Fits 100% within initial screen without scrolling (User Request: "till yaha tak same screen mein chiaye") */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center flex-1 my-auto">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-center flex-1 my-auto min-h-0">
         {/* Left Column: Clean Editorial Headline & Content */}
-        <div className="lg:col-span-5 space-y-4 lg:pr-4 text-left">
+        <div className="lg:col-span-5 space-y-3.5 lg:pr-2 text-left z-20">
           {/* Eyebrow Pill Badge */}
           <div className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-widest shadow-sm ${
             darkMode
@@ -210,8 +210,8 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Prominent 3D Earth (Calibrated so it fills the screen without clipping) */}
-        <div className="lg:col-span-7 relative h-[52vh] sm:h-[58vh] lg:h-[64vh] max-h-[540px] w-full flex items-center justify-center lg:translate-x-3 overflow-visible">
+        {/* Right Column: Prominent 3D Earth (Sized to fill available height matching the user's red circle) */}
+        <div className="lg:col-span-7 relative h-[60vh] sm:h-[68vh] lg:h-[78vh] xl:h-[82vh] max-h-[820px] w-full flex items-center justify-center lg:translate-x-3 overflow-visible">
           <div className="w-full h-full relative bg-transparent overflow-visible">
             <EarthGlobe
               hotspots={hotspots}
@@ -226,7 +226,7 @@ export const Hero: React.FC<HeroProps> = ({
       </div>
 
       {/* Bottom Unified Control Dock: 100% visible on initial screen without scrolling */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-20 flex items-center justify-between pb-1 select-none">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 z-20 flex items-center justify-between pb-1 select-none shrink-0">
         {/* Left: Scroll Down Action Button */}
         <button
           onClick={handleScrollDown}

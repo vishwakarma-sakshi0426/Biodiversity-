@@ -157,15 +157,15 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   const previousMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   
   // Safe Camera Distance & Balanced Earth Size so it fills the screen as much as possible but NEVER clips or cuts flat
-  const MIN_CAMERA_DIST = 3.15;
-  const MAX_CAMERA_DIST = 4.3;
-  const DEFAULT_CAMERA_DIST = 3.55;
+  const MIN_CAMERA_DIST = 2.40;
+  const MAX_CAMERA_DIST = 4.40;
+  const DEFAULT_CAMERA_DIST = 3.65;
 
   const targetCameraDistanceRef = useRef<number>(DEFAULT_CAMERA_DIST);
   const currentCameraDistanceRef = useRef<number>(DEFAULT_CAMERA_DIST);
   const targetRotationRef = useRef<{ x: number; y: number }>({ x: 0.18, y: -0.6 });
 
-  const GLOBE_RADIUS = 1.25;
+  const GLOBE_RADIUS = 1.20;
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -177,7 +177,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 100);
     // Centered vertically so top and bottom never clip
     camera.position.set(0, 0, currentCameraDistanceRef.current);
     cameraRef.current = camera;
@@ -200,7 +200,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     earthGroup.rotation.x = targetRotationRef.current.x;
     earthGroup.rotation.y = targetRotationRef.current.y;
     // Balanced Earth position so it fills the screen without right/left edge clipping
-    earthGroup.position.x = 0.08;
+    earthGroup.position.x = 0.04;
     earthGroup.position.y = 0;
 
     // Earth Sphere
@@ -231,7 +231,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     cloudMeshRef.current = cloudMesh;
 
     // Atmospheric Cyan Halo
-    const atmosphereGeometry = new THREE.SphereGeometry(GLOBE_RADIUS + 0.065, 48, 48);
+    const atmosphereGeometry = new THREE.SphereGeometry(GLOBE_RADIUS + 0.055, 48, 48);
     const atmosphereMaterial = new THREE.ShaderMaterial({
       side: THREE.BackSide,
       transparent: true,
@@ -346,12 +346,26 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       if (!container || !cameraRef.current || !rendererRef.current) return;
       const newWidth = container.clientWidth;
       const newHeight = container.clientHeight;
-      cameraRef.current.aspect = newWidth / newHeight;
-      cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(newWidth, newHeight);
+      if (newWidth > 0 && newHeight > 0) {
+        cameraRef.current.aspect = newWidth / newHeight;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(newWidth, newHeight);
+      }
     };
 
     window.addEventListener('resize', handleResize);
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width: newWidth, height: newHeight } = entry.contentRect;
+        if (newWidth > 0 && newHeight > 0 && cameraRef.current && rendererRef.current) {
+          cameraRef.current.aspect = newWidth / newHeight;
+          cameraRef.current.updateProjectionMatrix();
+          rendererRef.current.setSize(newWidth, newHeight);
+        }
+      }
+    });
+    resizeObserver.observe(container);
 
     const onContainerWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -363,6 +377,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       container.removeEventListener('wheel', onContainerWheel);
       if (rendererRef.current && renderer.domElement) {
         container.removeChild(renderer.domElement);
@@ -537,18 +552,18 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   };
 
   const handleZoomIn = () => {
-    targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, targetCameraDistanceRef.current - 0.22);
+    targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, targetCameraDistanceRef.current - 0.30);
   };
 
   const handleZoomOut = () => {
-    targetCameraDistanceRef.current = Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + 0.22);
+    targetCameraDistanceRef.current = Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + 0.30);
   };
 
   const handleReset = () => {
     targetCameraDistanceRef.current = DEFAULT_CAMERA_DIST;
-    targetRotationRef.current = { x: 0.22, y: -0.6 };
+    targetRotationRef.current = { x: 0.18, y: -0.6 };
     if (earthGroupRef.current) {
-      earthGroupRef.current.rotation.x = 0.22;
+      earthGroupRef.current.rotation.x = 0.18;
       earthGroupRef.current.rotation.y = -0.6;
     }
     setIsRotating(true);
@@ -862,8 +877,8 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       </div>
 
-      {/* Prominent Zoom (+ / −) Controls on the Earth (Shifted further right per User Request: "yeh + - button for earth thod or right mein") */}
-      <div className="absolute -right-1 sm:right-1 lg:-right-5 bottom-6 z-20 flex flex-col items-center gap-1.5 bg-white/90 dark:bg-[#0B2533]/90 backdrop-blur-md p-1.5 rounded-full border border-gray-200/80 dark:border-[#1FB6C9]/30 shadow-lg hover:shadow-xl transition-all">
+      {/* Prominent Zoom (+ / −) Controls on the Earth */}
+      <div className="absolute right-2 sm:right-4 lg:right-3 bottom-8 z-30 flex flex-col items-center gap-1.5 bg-white/90 dark:bg-[#0B2533]/90 backdrop-blur-md p-1.5 rounded-full border border-gray-200/80 dark:border-[#1FB6C9]/30 shadow-lg hover:shadow-xl transition-all">
         <button
           onClick={handleZoomIn}
           className="w-8 h-8 rounded-full bg-white dark:bg-[#123648] hover:bg-[#E4F4F5] dark:hover:bg-[#1FB6C9]/20 text-[#0B3A4A] dark:text-[#E4F4F5] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"

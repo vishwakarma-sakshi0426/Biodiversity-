@@ -86,8 +86,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records,
           <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-xs uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
             Real-Time Analytics & Enforcement Telemetry
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl text-[#0B3A4A] font-bold leading-tight tracking-tight">
-            Intelligence <span className="italic text-[#1FB6C9] font-bold">Dashboard</span>
+          <h2 className="font-serif text-4xl sm:text-5xl text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
+            Intelligence <span className="italic text-[#1FB6C9] font-extrabold">Dashboard</span>
           </h2>
           <p className="mt-2 text-sm sm:text-base text-[#3A5A64]">
             Aggregated metrics derived from live content scanning, verified seizures, and CITES compliance investigations.

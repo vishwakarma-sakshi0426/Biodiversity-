@@ -57,7 +57,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   const navLinks: { label: string; page: AppPage; icon?: any }[] = [
     { label: dict?.navEarth || 'Earth & Mission', page: 'home' },
     { label: dict?.navDetect || 'Wildlife Trade Detection', page: 'detect', icon: Sparkles },
-    { label: dict?.navDashboard || 'Analytics Dashboard', page: 'dashboard', icon: BarChart3 },
+    { label: dict?.navDashboard || 'Intelligence Dashboard', page: 'dashboard', icon: BarChart3 },
     { label: dict?.navArchitecture || 'Architecture & Research', page: 'architecture', icon: Layers },
   ];
 
@@ -131,7 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     isActive ? (darkMode ? 'text-white' : 'text-[#9BF0FB]') : 'text-[#1FB6C9]'
                   }`} />
                 )}
-                <span>{link.label}</span>
+                <span className="font-bold tracking-wider">{link.label}</span>
               </button>
             );
           })}
