@@ -4,19 +4,26 @@ import { Hero } from './components/Hero';
 import { Mission } from './components/Mission';
 import { DetectionSection } from './components/Detection/DetectionSection';
 import { AnalyticsDashboard } from './components/Dashboard/AnalyticsDashboard';
+import { ArchitectureSection } from './components/Architecture/ArchitectureSection';
 import { ConservationImpact } from './components/Impact/ConservationImpact';
 import { Footer } from './components/Footer';
 
 import { BIODIVERSITY_HOTSPOTS } from './data/hotspotsData';
 import { HISTORICAL_INCIDENTS } from './data/incidentsData';
 import { INITIAL_ANALYSIS_RECORDS } from './data/initialAnalysisRecords';
+import { TRANSLATIONS, SupportedLanguage } from './utils/translations';
 import type { HotspotType, IncidentType, AnalysisResult } from './types';
 
 export function App() {
   const [currentPage, setCurrentPage] = useState<AppPage>('home');
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [language, setLanguage] = useState<SupportedLanguage>('en');
+
   const [hotspots] = useState<HotspotType[]>(BIODIVERSITY_HOTSPOTS);
   const [incidents] = useState<IncidentType[]>(HISTORICAL_INCIDENTS);
   const [analysisRecords, setAnalysisRecords] = useState<AnalysisResult[]>(INITIAL_ANALYSIS_RECORDS);
+
+  const dict = TRANSLATIONS[language] || TRANSLATIONS.en;
 
   // Dynamic Dashboard Update: When user logs an analysis from Detection tool
   const handleLogAnalysisToDashboard = (record: AnalysisResult) => {
@@ -28,12 +35,23 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleToggleDarkMode = () => {
+    setDarkMode(prev => !prev);
+  };
+
   return (
-    <div className="min-h-screen bg-[#F7F2E7] text-[#3A5A64] font-sans relative selection:bg-[#1FB6C9]/25 selection:text-[#0B3A4A]">
+    <div className={`min-h-screen font-sans relative selection:bg-[#1FB6C9]/25 selection:text-[#0B3A4A] transition-colors duration-300 ${
+      darkMode ? 'bg-[#061822] text-[#E4F4F5]' : 'bg-[#F7F2E7] text-[#3A5A64]'
+    }`}>
       {/* Top Sticky Header */}
       <Navigation
         currentPage={currentPage}
         onPageChange={handleNavigatePage}
+        darkMode={darkMode}
+        onToggleDarkMode={handleToggleDarkMode}
+        language={language}
+        onLanguageChange={setLanguage}
+        dict={dict}
       />
 
       {/* Main Pages Switch */}
@@ -50,6 +68,8 @@ export function App() {
                 const el = document.getElementById('mission');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
+              dict={dict}
+              darkMode={darkMode}
             />
 
             {/* Our Mission: Editorial Story & 3 Pillars */}
@@ -82,12 +102,20 @@ export function App() {
             />
           </div>
         )}
+
+        {/* PAGE 4: TECHNICAL ARCHITECTURE & RESEARCH (Exact Replica of User Reference) */}
+        {currentPage === 'architecture' && (
+          <div className="animate-in fade-in duration-300 pt-8">
+            <ArchitectureSection darkMode={darkMode} />
+          </div>
+        )}
       </main>
 
       {/* Global Luxury Coralis Footer */}
       <Footer onNavigate={(id) => {
         if (id === 'detect') handleNavigatePage('detect');
         else if (id === 'dashboard') handleNavigatePage('dashboard');
+        else if (id === 'architecture') handleNavigatePage('architecture');
         else handleNavigatePage('home');
       }} />
     </div>

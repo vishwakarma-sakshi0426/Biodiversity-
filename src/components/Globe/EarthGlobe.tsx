@@ -33,33 +33,74 @@ interface ActivePopCardData {
   isExpanded?: boolean;
 }
 
-// 3D Billboard label sprites right on the Earth (crisp, high-contrast)
-function createLabelSprite(text: string, borderColor: string, bgColor: string): THREE.Sprite {
+// 3D Billboard label sprites right on the Earth (Dot/Mark placed right beside the place name)
+function createLabelSprite(
+  text: string,
+  markerColor: string,
+  borderColor: string,
+  bgColor: string,
+  shape: 'circle' | 'diamond' = 'circle'
+): THREE.Sprite {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-  canvas.width = 340;
+  canvas.width = 360;
   canvas.height = 76;
-  ctx.font = 'bold 24px Manrope, sans-serif';
+  ctx.font = 'bold 22px Manrope, sans-serif';
   const textWidth = ctx.measureText(text).width;
-  const pillW = Math.min(310, textWidth + 36);
-  const pillH = 46;
+  
+  const dotSize = 8;
+  const paddingX = 18;
+  const pillW = Math.min(340, textWidth + paddingX * 2 + dotSize + 12);
+  const pillH = 42;
   const startX = (canvas.width - pillW) / 2;
   const startY = (canvas.height - pillH) / 2;
 
-  // Background pill
+  // Background pill with subtle border
   ctx.fillStyle = bgColor;
   ctx.strokeStyle = borderColor;
-  ctx.lineWidth = 3.5;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.roundRect(startX, startY, pillW, pillH, 22);
+  ctx.roundRect(startX, startY, pillW, pillH, 21);
   ctx.fill();
   ctx.stroke();
 
-  // Text
+  // Marker icon drawn directly inside the pill beside the location name
+  const dotCenterX = startX + paddingX + dotSize / 2;
+  const dotCenterY = canvas.height / 2;
+
+  if (shape === 'circle') {
+    // Hotspot dot
+    ctx.fillStyle = markerColor;
+    ctx.beginPath();
+    ctx.arc(dotCenterX, dotCenterY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner white gleam
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(dotCenterX, dotCenterY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Incident warning marker
+    ctx.fillStyle = markerColor;
+    ctx.beginPath();
+    ctx.moveTo(dotCenterX, dotCenterY - 6.5);
+    ctx.lineTo(dotCenterX + 6.5, dotCenterY);
+    ctx.lineTo(dotCenterX, dotCenterY + 6.5);
+    ctx.lineTo(dotCenterX - 6.5, dotCenterY);
+    ctx.closePath();
+    ctx.fill();
+    // Inner white gleam
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(dotCenterX, dotCenterY, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Text directly beside the indicator mark
   ctx.fillStyle = '#FFFFFF';
-  ctx.textAlign = 'center';
+  ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  ctx.fillText(text, dotCenterX + 12, canvas.height / 2);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.minFilter = THREE.LinearFilter;
@@ -69,8 +110,8 @@ function createLabelSprite(text: string, borderColor: string, bgColor: string): 
     transparent: true
   });
   const sprite = new THREE.Sprite(spriteMat);
-  sprite.scale.set(0.42, 0.095, 1);
-  sprite.position.y = 0.11;
+  sprite.scale.set(0.38, 0.08, 1);
+  sprite.position.y = 0.062;
   return sprite;
 }
 
@@ -338,9 +379,17 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
     window.addEventListener('resize', handleResize);
 
+    const onContainerWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY * 0.0025;
+      targetCameraDistanceRef.current = Math.max(1.5, Math.min(5.2, targetCameraDistanceRef.current + zoomDelta));
+    };
+    container.addEventListener('wheel', onContainerWheel, { passive: false });
+
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      container.removeEventListener('wheel', onContainerWheel);
       if (rendererRef.current && renderer.domElement) {
         container.removeChild(renderer.domElement);
         renderer.dispose();
@@ -358,7 +407,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     }
     rippleRingsRef.current = [];
 
-    // Hotspot Markers (Vivid Turquoise/Cyan #00E5FF & #1FB6C9)
+    // Hotspot Markers (Clean, subtle turquoise surface pin + mark inside name label; NO ripple rings)
     if (showHotspots) {
       hotspots.forEach(hotspot => {
         const markerGroup = new THREE.Group();
@@ -370,50 +419,32 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const normal = pos.clone().normalize();
         markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
-        // Outer Vibrant Turquoise Sphere (Larger, High Visibility)
-        const outerPinGeo = new THREE.SphereGeometry(0.046, 16, 16);
+        // Sleek subtle surface dot (not overly highlighted)
+        const outerPinGeo = new THREE.SphereGeometry(0.024, 16, 16);
         const outerPinMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF });
         const outerPinMesh = new THREE.Mesh(outerPinGeo, outerPinMat);
-        outerPinMesh.position.y = 0.055;
+        outerPinMesh.position.y = 0.022;
         markerGroup.add(outerPinMesh);
 
-        // Inner Bright White Core (Gleams in 3D)
-        const innerCoreGeo = new THREE.SphereGeometry(0.024, 16, 16);
+        // Inner white dot
+        const innerCoreGeo = new THREE.SphereGeometry(0.012, 12, 12);
         const innerCoreMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
         const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
-        innerCoreMesh.position.y = 0.055;
+        innerCoreMesh.position.y = 0.022;
         markerGroup.add(innerCoreMesh);
 
-        // Stem
-        const stemGeo = new THREE.CylinderGeometry(0.009, 0.012, 0.055, 8);
-        const stemMat = new THREE.MeshBasicMaterial({ color: 0x1FB6C9 });
-        const stemMesh = new THREE.Mesh(stemGeo, stemMat);
-        stemMesh.position.y = 0.026;
-        markerGroup.add(stemMesh);
+        // NOTE: Blue hotspots do NOT have ripple rings per user request: "woh rigns just red mein blue mein nahi"
 
-        // Ripple Ring
-        const ringGeo = new THREE.RingGeometry(0.035, 0.075, 24);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: 0x52CFDF,
-          transparent: true,
-          opacity: 0.85,
-          side: THREE.DoubleSide
-        });
-        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-        ringMesh.rotation.x = Math.PI / 2;
-        markerGroup.add(ringMesh);
-        rippleRingsRef.current.push(ringMesh);
-
-        // 3D Name Label right at the mark on the Earth
+        // 3D Billboard label with indicator mark drawn right beside the location name
         const shortName = hotspot.name.replace(' Hotspot', '');
-        const labelSprite = createLabelSprite(shortName, '#00E5FF', 'rgba(7, 44, 56, 0.94)');
+        const labelSprite = createLabelSprite(shortName, '#00E5FF', '#00E5FF', 'rgba(7, 44, 56, 0.92)', 'circle');
         markerGroup.add(labelSprite);
 
         hotspotMarkersRef.current.add(markerGroup);
       });
     }
 
-    // Incident Markers (Vivid Warning Crimson Red #FF2D55 & #FF3B30)
+    // Incident Markers (Warning Crimson Red + Pulsing Rings ONLY on Red per user request)
     if (showIncidents) {
       incidents.forEach(incident => {
         const markerGroup = new THREE.Group();
@@ -425,29 +456,22 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const normal = pos.clone().normalize();
         markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
-        // Outer Vivid Red Diamond Pin (Larger, High Visibility)
-        const diamondGeo = new THREE.OctahedronGeometry(0.052, 0);
+        // Small Red Diamond Pin
+        const diamondGeo = new THREE.OctahedronGeometry(0.028, 0);
         const diamondMat = new THREE.MeshBasicMaterial({ color: 0xFF2D55 });
         const diamondMesh = new THREE.Mesh(diamondGeo, diamondMat);
-        diamondMesh.position.y = 0.06;
+        diamondMesh.position.y = 0.026;
         markerGroup.add(diamondMesh);
 
         // Inner White Core
-        const innerCoreGeo = new THREE.SphereGeometry(0.024, 16, 16);
+        const innerCoreGeo = new THREE.SphereGeometry(0.012, 12, 12);
         const innerCoreMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
         const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
-        innerCoreMesh.position.y = 0.06;
+        innerCoreMesh.position.y = 0.026;
         markerGroup.add(innerCoreMesh);
 
-        // Stem
-        const stemGeo = new THREE.CylinderGeometry(0.009, 0.012, 0.055, 8);
-        const stemMat = new THREE.MeshBasicMaterial({ color: 0xE83131 });
-        const stemMesh = new THREE.Mesh(stemGeo, stemMat);
-        stemMesh.position.y = 0.026;
-        markerGroup.add(stemMesh);
-
-        // Warning Pulse Ring
-        const ringGeo = new THREE.RingGeometry(0.038, 0.085, 24);
+        // Warning Pulse Ring ONLY for red seizure incidents
+        const ringGeo = new THREE.RingGeometry(0.032, 0.075, 24);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0xFF3B30,
           transparent: true,
@@ -459,9 +483,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         markerGroup.add(ringMesh);
         rippleRingsRef.current.push(ringMesh);
 
-        // 3D Name Label right at the mark on the Earth
+        // 3D Billboard label with diamond indicator mark drawn right beside the name
         const shortIncidentName = incident.country + ' Seizure';
-        const labelSprite = createLabelSprite(shortIncidentName, '#FF3B30', 'rgba(58, 8, 8, 0.94)');
+        const labelSprite = createLabelSprite(shortIncidentName, '#FF3B30', '#FF3B30', 'rgba(58, 8, 8, 0.92)', 'diamond');
         markerGroup.add(labelSprite);
 
         incidentMarkersRef.current.add(markerGroup);

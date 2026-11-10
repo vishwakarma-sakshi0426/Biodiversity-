@@ -88,6 +88,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Enforcement Analytics & KPIs
                 </button>
               </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('architecture')}
+                  className="hover:text-[#1FB6C9] transition-colors"
+                >
+                  Technical Architecture & Research
+                </button>
+              </li>
             </ul>
           </div>
 
