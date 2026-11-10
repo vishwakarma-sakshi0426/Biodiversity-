@@ -129,8 +129,8 @@ export const Hero: React.FC<HeroProps> = ({
             {dict?.heroEyebrow || 'GLOBAL WILDLIFE INTELLIGENCE'}
           </div>
 
-          {/* Cormorant Garamond Main Headline: Bold & Clean (Main heading increased by 4px per user request) */}
-          <h1 className={`font-serif text-[36px] sm:text-[42px] lg:text-[52px] xl:text-[58px] font-bold leading-[1.08] tracking-tight ${
+          {/* Cormorant Garamond Main Headline: Bold & Clean (Decreased by 4px per user request) */}
+          <h1 className={`font-serif text-[32px] sm:text-[38px] lg:text-[48px] xl:text-[54px] font-bold leading-[1.08] tracking-tight ${
             darkMode ? 'text-white' : 'text-[#0B3A4A]'
           }`}>
             {dict?.heroTitleLine1 || 'Protect the wild.'}

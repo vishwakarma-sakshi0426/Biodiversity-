@@ -41,7 +41,7 @@ export function App() {
 
   return (
     <div className={`min-h-screen font-sans relative selection:bg-[#1FB6C9]/25 selection:text-[#0B3A4A] transition-colors duration-300 ${
-      darkMode ? 'bg-[#061822] text-[#E4F4F5]' : 'bg-[#F7F2E7] text-[#3A5A64]'
+      darkMode ? 'dark bg-[#061822] text-[#E4F4F5]' : 'bg-[#F7F2E7] text-[#3A5A64]'
     }`}>
       {/* Top Sticky Header */}
       <Navigation
@@ -89,6 +89,7 @@ export function App() {
             <DetectionSection
               onLogAnalysisToDashboard={handleLogAnalysisToDashboard}
               onNavigateToDashboard={() => handleNavigatePage('dashboard')}
+              darkMode={darkMode}
             />
           </div>
         )}
@@ -99,6 +100,7 @@ export function App() {
             <AnalyticsDashboard
               records={analysisRecords}
               onNavigateToDetect={() => handleNavigatePage('detect')}
+              darkMode={darkMode}
             />
           </div>
         )}

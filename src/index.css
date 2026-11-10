@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-turquoise: #1FB6C9;
   --color-turquoise-dark: #1693A3;

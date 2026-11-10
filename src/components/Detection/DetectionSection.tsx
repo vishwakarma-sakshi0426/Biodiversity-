@@ -191,7 +191,9 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({
         <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-[14px] uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
           AI Intelligence Engine
         </span>
-        <h2 className="font-serif text-[40px] sm:text-[52px] lg:text-[64px] text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
+        <h2 className={`font-serif text-[38px] sm:text-[48px] lg:text-[58px] font-extrabold leading-tight tracking-tight ${
+          darkMode ? 'text-white' : 'text-[#0B3A4A]'
+        }`}>
           Wildlife Trade <span className="italic text-[#FF7E6B] font-extrabold">Detection</span>
         </h2>
         <p className="mt-4 text-[18px] sm:text-[21px] text-[#3A5A64] leading-relaxed">

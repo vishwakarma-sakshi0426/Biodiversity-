@@ -5,9 +5,10 @@ import { TrendingUp, AlertTriangle, CheckCircle, HelpCircle, Search, Eye, Downlo
 interface AnalyticsDashboardProps {
   records: AnalysisResult[];
   onNavigateToDetect?: () => void;
+  darkMode?: boolean;
 }
 
-export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records, onNavigateToDetect }) => {
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records, onNavigateToDetect, darkMode = false }) => {
   const [filterPrediction, setFilterPrediction] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedInspectRecord, setSelectedInspectRecord] = useState<AnalysisResult | null>(null);
@@ -86,7 +87,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records,
           <span className="inline-block px-4 py-1.5 rounded-full bg-[#E4F4F5] text-[#0B3A4A] text-[14px] uppercase font-bold tracking-widest border border-[#1FB6C9]/25 mb-3">
             Real-Time Analytics & Enforcement Telemetry
           </span>
-          <h2 className="font-serif text-[40px] sm:text-[52px] text-[#0B3A4A] dark:text-white font-extrabold leading-tight tracking-tight">
+          <h2 className={`font-serif text-[38px] sm:text-[48px] font-extrabold leading-tight tracking-tight ${
+            darkMode ? 'text-white' : 'text-[#0B3A4A]'
+          }`}>
             Intelligence <span className="italic text-[#1FB6C9] font-extrabold">Dashboard</span>
           </h2>
           <p className="mt-2 text-[17px] sm:text-[19px] text-[#3A5A64]">

@@ -74,41 +74,41 @@ export const Navigation: React.FC<NavigationProps> = ({
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled
           ? darkMode
-            ? 'bg-[#061822]/92 backdrop-blur-md py-3 shadow-md border-b border-[#1FB6C9]/20'
-            : 'bg-[#F7F2E7]/92 backdrop-blur-md py-3 shadow-sm border-b border-[#1FB6C9]/15'
+            ? 'bg-[#061822]/92 backdrop-blur-md py-2 shadow-md border-b border-[#1FB6C9]/20'
+            : 'bg-[#F7F2E7]/92 backdrop-blur-md py-2 shadow-sm border-b border-[#1FB6C9]/15'
           : darkMode
-            ? 'bg-[#061822]/75 backdrop-blur-sm py-3.5 border-b border-transparent'
-            : 'bg-[#F7F2E7]/80 backdrop-blur-sm py-4 border-b border-transparent'
+            ? 'bg-[#061822]/75 backdrop-blur-sm py-2.5 border-b border-transparent'
+            : 'bg-[#F7F2E7]/80 backdrop-blur-sm py-2.5 border-b border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand / Logo (Coralis Typography) */}
         <button
           onClick={() => handleLinkClick('home')}
-          className="flex items-center gap-2.5 text-left group cursor-pointer"
+          className="flex items-center gap-2 text-left group cursor-pointer"
         >
-          <div className="w-9 h-9 rounded-full bg-[#1FB6C9] flex items-center justify-center text-white shadow-md shadow-[#1FB6C9]/30 group-hover:scale-105 transition-transform">
-            <Globe2 className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-full bg-[#1FB6C9] flex items-center justify-center text-white shadow-md shadow-[#1FB6C9]/30 group-hover:scale-105 transition-transform">
+            <Globe2 className="w-4 h-4 text-white" />
           </div>
           <div>
-            <span className={`font-serif text-[27px] font-semibold tracking-tight leading-none block ${
+            <span className={`font-serif text-[23px] font-semibold tracking-tight leading-none block ${
               darkMode ? 'text-white' : 'text-[#0B3A4A]'
             }`}>
               WILD<span className="text-[#1FB6C9]">INTEL</span>
             </span>
-            <span className={`text-[12px] uppercase tracking-widest font-bold block mt-0.5 ${
-              darkMode ? 'text-[#9BF0FB]' : 'text-[#6E8890]'
+            <span className={`text-[9px] uppercase tracking-widest font-bold block mt-0.5 ${
+              darkMode ? 'text-[#9BF0FB]' : 'text-[#0B3A4A]/70'
             }`}>
               {dict?.brandSubtitle || 'Global Wildlife Intelligence'}
             </span>
           </div>
         </button>
 
-        {/* Desktop Navigation Links */}
-        <nav className={`hidden lg:flex items-center gap-1.5 p-1.5 rounded-full border shadow-sm transition-colors duration-300 ${
+        {/* Desktop Navigation Links (Decreased by 4px, sleek & high contrast dark blue shade) */}
+        <nav className={`hidden lg:flex items-center gap-1 p-1 rounded-full border shadow-sm transition-colors duration-300 ${
           darkMode
             ? 'bg-[#0B2533]/90 border-[#1FB6C9]/30'
-            : 'bg-white/70 border-[#1FB6C9]/20'
+            : 'bg-white/80 border-[#1FB6C9]/20'
         }`}>
           {navLinks.map((link) => {
             const isActive = currentPage === link.page;
@@ -116,18 +116,18 @@ export const Navigation: React.FC<NavigationProps> = ({
               <button
                 key={link.page}
                 onClick={() => handleLinkClick(link.page)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[14px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   isActive
                     ? darkMode
                       ? 'bg-[#1FB6C9] text-white shadow-md shadow-[#1FB6C9]/30'
                       : 'bg-[#0B3A4A] text-white shadow-md'
                     : darkMode
                       ? 'text-[#B0D1DA] hover:text-white hover:bg-white/10'
-                      : 'text-[#3A5A64] hover:text-[#0B3A4A] hover:bg-white/80'
+                      : 'text-[#0B3A4A] hover:text-[#1FB6C9] hover:bg-[#E4F4F5]'
                 }`}
               >
                 {link.icon && (
-                  <link.icon className={`w-4 h-4 ${
+                  <link.icon className={`w-3.5 h-3.5 ${
                     isActive ? (darkMode ? 'text-white' : 'text-[#9BF0FB]') : 'text-[#1FB6C9]'
                   }`} />
                 )}
@@ -137,21 +137,21 @@ export const Navigation: React.FC<NavigationProps> = ({
           })}
         </nav>
 
-        {/* Right Utility Controls: Language Selector, Dark Mode Toggle, AI Tool CTA */}
-        <div className="hidden sm:flex items-center gap-2.5">
+        {/* Right Utility Controls: Language Selector, Dark Mode Toggle, AI Tool CTA (Decreased by 4px) */}
+        <div className="hidden sm:flex items-center gap-2">
           
           {/* Language Selector Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[14px] font-semibold border transition-all cursor-pointer shadow-xs ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer shadow-xs ${
                 darkMode
                   ? 'bg-[#0B2533] border-[#1FB6C9]/30 text-[#E4F4F5] hover:bg-[#123648]'
                   : 'bg-white/80 border-[#1FB6C9]/25 text-[#0B3A4A] hover:bg-white'
               }`}
               title="Select Language"
             >
-              <Languages className="w-4 h-4 text-[#1FB6C9]" />
+              <Languages className="w-3.5 h-3.5 text-[#1FB6C9]" />
               <span>{currentLangObj.flag} {currentLangObj.code.toUpperCase()}</span>
             </button>
 
@@ -168,7 +168,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       onLanguageChange?.(langItem.code);
                       setLangDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3.5 py-1.5 text-xs flex items-center justify-between transition-colors ${
+                    className={`w-full text-left px-3.5 py-1.5 text-[11px] flex items-center justify-between transition-colors ${
                       language === langItem.code
                         ? 'font-bold bg-[#1FB6C9]/15 text-[#1FB6C9]'
                         : darkMode ? 'hover:bg-white/10' : 'hover:bg-[#E4F4F5]'
@@ -202,17 +202,17 @@ export const Navigation: React.FC<NavigationProps> = ({
           {currentPage !== 'detect' ? (
             <button
               onClick={() => handleLinkClick('detect')}
-              className="px-5 py-2.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-[14px] font-bold uppercase tracking-wider shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
+              className="px-4 py-1.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-[11px] font-bold uppercase tracking-wider shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 flex items-center gap-1.5 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3.5 h-3.5" />
               {dict?.ctaDetect || 'AI Detection Tool'}
             </button>
           ) : (
             <button
               onClick={() => handleLinkClick('dashboard')}
-              className="px-5 py-2.5 rounded-full bg-[#1FB6C9] hover:bg-[#1693A3] text-white text-[14px] font-bold uppercase tracking-wider shadow-md shadow-[#1FB6C9]/30 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
+              className="px-4 py-1.5 rounded-full bg-[#1FB6C9] hover:bg-[#1693A3] text-white text-[11px] font-bold uppercase tracking-wider shadow-md shadow-[#1FB6C9]/30 transition-all hover:scale-105 flex items-center gap-1.5 cursor-pointer"
             >
-              <BarChart3 className="w-4 h-4" />
+              <BarChart3 className="w-3.5 h-3.5" />
               {dict?.ctaAnalytics || 'Intelligence Dashboard'}
             </button>
           )}
