@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { EarthGlobe } from './Globe/EarthGlobe';
 import { HotspotType, IncidentType } from '../types';
-import { Sparkles, ChevronRight, Wind } from 'lucide-react';
+import { Sparkles, ChevronRight, Wind, ChevronDown, ArrowDown } from 'lucide-react';
 import { TranslationDictionary } from '../utils/translations';
 
 export interface NatureWallpaper {
@@ -11,36 +11,49 @@ export interface NatureWallpaper {
   biome: string;
 }
 
+// User-provided wallpapers from user upload
 export const NATURE_WALLPAPERS: NatureWallpaper[] = [
   {
-    name: 'Coralis Turquoise Lagoon',
+    name: 'Glacial Alpine Lagoon',
     category: 'blue',
-    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
-    biome: 'Pristine Marine Reef & Shallow Lagoon'
+    url: '/wallpapers/wallpaper-1-alpine-lake.jpg',
+    biome: 'Pristine Montane Glacial Lake & Pine Forest'
   },
   {
-    name: 'Amazonian Emerald Canopy',
-    category: 'green',
-    url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
-    biome: 'Deep Equatorial Rainforest'
-  },
-  {
-    name: 'Midnight Ocean Trench',
+    name: 'Temperate Rainforest Fjord',
     category: 'dark',
-    url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80',
-    biome: 'Nocturnal Pelagic Waters'
+    url: '/wallpapers/wallpaper-2-misty-fjord.jpg',
+    biome: 'Misty Coastal Fjord & Coniferous Canopy'
   },
   {
-    name: 'Misty Cloud Forest',
+    name: 'Serpentine Alpine Ridge',
     category: 'green',
-    url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80',
-    biome: 'High Altitude Montane Mist'
+    url: '/wallpapers/wallpaper-3-winding-forest.jpg',
+    biome: 'High-Altitude Winding Forest Pass'
   },
   {
-    name: 'Serengeti Twilight Savanna',
+    name: 'Coralis Coastal Lagoon',
+    category: 'blue',
+    url: '/wallpapers/wallpaper-4-turquoise-coast.jpg',
+    biome: 'Pristine Turquoise Shore & Shallow Reef'
+  },
+  {
+    name: 'Emerald Gorge Sanctuary',
+    category: 'green',
+    url: '/wallpapers/wallpaper-5-emerald-bridge.jpg',
+    biome: 'Ancient Forest River Canyon & Arched Pass'
+  },
+  {
+    name: 'Pelagic Marine Haven',
+    category: 'blue',
+    url: '/wallpapers/wallpaper-6-ocean-turtles.jpg',
+    biome: 'Sunlit Deep Ocean & Wild Sea Turtle Sanctuary'
+  },
+  {
+    name: 'Sunbeam Primeval Forest',
     category: 'amber',
-    url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1920&q=80',
-    biome: 'Golden Hour Migration Plains'
+    url: '/wallpapers/wallpaper-7-sunbeam-forest.jpg',
+    biome: 'Morning Sunbeams & Deciduous Canopy Trail'
   }
 ];
 
@@ -65,23 +78,32 @@ export const Hero: React.FC<HeroProps> = ({
 
   const activeWallpaper = NATURE_WALLPAPERS[activeWallpaperIdx] || NATURE_WALLPAPERS[0];
 
+  const handleScrollDown = () => {
+    const el = document.getElementById('mission');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollBy({ top: window.innerHeight * 0.9, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <section className={`relative min-h-[92vh] w-full flex items-center overflow-hidden pt-20 pb-10 transition-colors duration-300 ${
+    <section className={`relative min-h-[94vh] w-full flex items-center overflow-hidden pt-20 pb-12 transition-colors duration-300 ${
       darkMode ? 'text-[#E4F4F5]' : 'text-[#3A5A64]'
     }`}>
-      {/* Dynamic Nature Wallpapers Layer: Vibrant and clearly visible (User Request: "ab to bulkul visible nahi hai wallpaper") */}
+      {/* Dynamic Nature Wallpapers Layer: Using the user's uploaded images */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         {NATURE_WALLPAPERS.map((wp, idx) => (
           <div
             key={idx}
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
-              activeWallpaperIdx === idx ? 'opacity-85' : 'opacity-0'
+              activeWallpaperIdx === idx ? 'opacity-90' : 'opacity-0'
             }`}
             style={{ backgroundImage: `url(${wp.url})` }}
           />
         ))}
 
-        {/* Directional Vignette Gradient Wash: Ensures Left-Side Text is 100% Readable while Right-Side Nature Wallpaper is Richly Visible */}
+        {/* Directional Vignette Gradient Wash */}
         <div className={`absolute inset-0 pointer-events-none transition-colors duration-500 ${
           darkMode
             ? 'bg-gradient-to-r from-[#061822]/95 via-[#061822]/65 to-[#061822]/25'
@@ -102,23 +124,23 @@ export const Hero: React.FC<HeroProps> = ({
             {dict?.heroEyebrow || 'GLOBAL WILDLIFE INTELLIGENCE'}
           </div>
 
-          {/* Cormorant Garamond Main Headline (User Request: Bold, remove wavy line) */}
-          <h1 className={`font-serif text-5xl sm:text-6xl lg:text-[68px] font-bold leading-[1.08] tracking-tight ${
+          {/* Cormorant Garamond Main Headline: Bold & No Wavy Line (User Request: "make this bolde nad remove that wavey line") */}
+          <h1 className={`font-serif text-5xl sm:text-6xl lg:text-[70px] font-bold leading-[1.06] tracking-tight ${
             darkMode ? 'text-white' : 'text-[#0B3A4A]'
           }`}>
             {dict?.heroTitleLine1 || 'Protect the wild.'}
             <br />
             <span className={`italic font-bold relative ${darkMode ? 'text-[#E4F4F5]' : 'text-[#0B3A4A]'}`}>
               {dict?.heroTitleLine2Pre || 'Preserve our '}
-              <span className="text-[#1FB6C9]">
+              <span className="text-[#1FB6C9] not-italic">
                 {dict?.heroTitleLine2Highlight || 'living Earth.'}
               </span>
             </span>
           </h1>
 
           {/* Description */}
-          <p className={`text-base font-normal leading-relaxed max-w-lg ${
-            darkMode ? 'text-[#B0D1DA]' : 'text-[#3A5A64]'
+          <p className={`text-base font-medium leading-relaxed max-w-lg ${
+            darkMode ? 'text-[#CBD5E1]' : 'text-[#3A5A64]'
           }`}>
             {dict?.heroDescription || "Explore Earth's biodiversity hotspots, uncover reported wildlife crime incidents, and identify the digital traces of illegal wildlife trade."}
           </p>
@@ -149,7 +171,7 @@ export const Hero: React.FC<HeroProps> = ({
             darkMode ? 'border-[#1FB6C9]/25' : 'border-[#1FB6C9]/20'
           }`}>
             <div>
-              <div className={`font-serif text-2xl sm:text-3xl font-semibold ${
+              <div className={`font-serif text-2xl sm:text-3xl font-bold ${
                 darkMode ? 'text-white' : 'text-[#0B3A4A]'
               }`}>
                 {dict?.statHotspots || '10+'}
@@ -161,7 +183,7 @@ export const Hero: React.FC<HeroProps> = ({
               </div>
             </div>
             <div>
-              <div className="font-serif text-2xl sm:text-3xl font-semibold text-[#FF7E6B]">
+              <div className="font-serif text-2xl sm:text-3xl font-bold text-[#FF7E6B]">
                 {dict?.statSeized || '8.8k+'}
               </div>
               <div className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${
@@ -171,7 +193,7 @@ export const Hero: React.FC<HeroProps> = ({
               </div>
             </div>
             <div>
-              <div className="font-serif text-2xl sm:text-3xl font-semibold text-[#1FB6C9]">
+              <div className="font-serif text-2xl sm:text-3xl font-bold text-[#1FB6C9]">
                 {dict?.statPrecision || '94%'}
               </div>
               <div className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${
@@ -183,8 +205,8 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Prominent 3D Earth (Shifted slightly right, balanced size) */}
-        <div className="lg:col-span-7 relative h-[500px] sm:h-[580px] lg:h-[640px] w-full flex items-center justify-center lg:translate-x-4">
+        {/* Right Column: Prominent 3D Earth */}
+        <div className="lg:col-span-7 relative h-[520px] sm:h-[600px] lg:h-[650px] w-full flex items-center justify-center lg:translate-x-4">
           <div className="w-full h-full relative bg-transparent">
             <EarthGlobe
               hotspots={hotspots}
@@ -197,8 +219,8 @@ export const Hero: React.FC<HeroProps> = ({
         </div>
       </div>
 
-      {/* Atmospheric Biome Indicator & Wallpaper Selector (Floating at Bottom) */}
-      <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 backdrop-blur-md px-4 py-1.5 rounded-full border shadow-md text-xs transition-colors duration-300 ${
+      {/* Atmospheric Biome Indicator & Wallpaper Selector (Floating at Bottom Center) */}
+      <div className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-20 hidden sm:flex items-center gap-3 backdrop-blur-md px-4 py-1.5 rounded-full border shadow-md text-xs transition-colors duration-300 ${
         darkMode
           ? 'bg-[#0B2533]/85 border-[#1FB6C9]/30 text-[#E4F4F5]'
           : 'bg-white/85 border-[#1FB6C9]/20 text-[#0B3A4A]'
@@ -210,7 +232,7 @@ export const Hero: React.FC<HeroProps> = ({
           </span>
         </div>
 
-        {/* 5 Dots for 5 Nature Wallpapers */}
+        {/* 7 Dots for 7 Nature Wallpapers */}
         <div className={`flex items-center gap-1.5 pl-2 border-l ${
           darkMode ? 'border-gray-700' : 'border-gray-200'
         }`}>
@@ -227,6 +249,23 @@ export const Hero: React.FC<HeroProps> = ({
             />
           ))}
         </div>
+      </div>
+
+      {/* Prominent Scroll Down Button (User Request: "ek page scroll down") */}
+      <div className="absolute bottom-5 left-6 sm:left-10 lg:left-14 z-20 flex items-center">
+        <button
+          onClick={handleScrollDown}
+          className={`group flex items-center gap-2.5 px-4 py-2 rounded-full border backdrop-blur-md shadow-sm transition-all hover:scale-105 cursor-pointer text-xs font-semibold ${
+            darkMode
+              ? 'bg-[#0B2533]/90 border-[#1FB6C9]/30 text-white hover:border-[#1FB6C9]'
+              : 'bg-white/90 border-[#1FB6C9]/25 text-[#0B3A4A] hover:border-[#1FB6C9]'
+          }`}
+          title="Scroll to Mission & Impact"
+        >
+          <span className="w-2 h-2 rounded-full bg-[#1FB6C9] group-hover:scale-125 transition-transform" />
+          <span className="uppercase tracking-widest text-[11px] font-bold">SCROLL DOWN</span>
+          <ChevronDown className="w-4 h-4 text-[#1FB6C9] animate-bounce" />
+        </button>
       </div>
     </section>
   );

@@ -888,25 +888,25 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       </div>
 
-      {/* Prominent Zoom (+ / −) Controls on the Earth (User Request: "earth zoom nahi ho pa rahi aache se") */}
-      <div className="absolute right-4 bottom-4 z-20 flex flex-col items-center gap-1.5 bg-white/85 backdrop-blur-md p-1.5 rounded-full border border-gray-200 shadow-md">
+      {/* Prominent Zoom (+ / −) Controls on the Earth (Shifted further right per User Request: "yeh + - button for earth thod or right mein") */}
+      <div className="absolute -right-1 sm:right-1 lg:-right-5 bottom-6 z-20 flex flex-col items-center gap-1.5 bg-white/90 dark:bg-[#0B2533]/90 backdrop-blur-md p-1.5 rounded-full border border-gray-200/80 dark:border-[#1FB6C9]/30 shadow-lg hover:shadow-xl transition-all">
         <button
           onClick={handleZoomIn}
-          className="w-8 h-8 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"
+          className="w-8 h-8 rounded-full bg-white dark:bg-[#123648] hover:bg-[#E4F4F5] dark:hover:bg-[#1FB6C9]/20 text-[#0B3A4A] dark:text-[#E4F4F5] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"
           title="Zoom In"
         >
-          <Plus className="w-4 h-4 text-[#0B3A4A]" />
+          <Plus className="w-4 h-4 text-[#0B3A4A] dark:text-[#E4F4F5]" />
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-8 h-8 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"
+          className="w-8 h-8 rounded-full bg-white dark:bg-[#123648] hover:bg-[#E4F4F5] dark:hover:bg-[#1FB6C9]/20 text-[#0B3A4A] dark:text-[#E4F4F5] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"
           title="Zoom Out"
         >
-          <Minus className="w-4 h-4 text-[#0B3A4A]" />
+          <Minus className="w-4 h-4 text-[#0B3A4A] dark:text-[#E4F4F5]" />
         </button>
         <button
           onClick={handleReset}
-          className="w-8 h-8 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] flex items-center justify-center shadow-sm transition-transform hover:scale-105 cursor-pointer"
+          className="w-8 h-8 rounded-full bg-white dark:bg-[#123648] hover:bg-[#E4F4F5] dark:hover:bg-[#1FB6C9]/20 text-[#0B3A4A] dark:text-[#E4F4F5] flex items-center justify-center shadow-sm transition-transform hover:scale-105 cursor-pointer"
           title="Reset Earth View"
         >
           <RotateCcw className="w-3.5 h-3.5 text-[#1FB6C9]" />
