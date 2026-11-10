@@ -885,14 +885,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </button>
       </div>
 
-      {/* Bottom Left Telemetry & Auto-Rotate Toggle */}
-      <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
-        <div className="bg-[#0B3A4A]/80 backdrop-blur-md text-[#E4F4F5] text-[10px] px-3 py-1 rounded-full border border-white/10 font-mono">
+      {/* Telemetry & Auto-Rotate Toggle (Top-Left of Globe container) */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <div className="bg-[#0B3A4A]/85 backdrop-blur-md text-[#E4F4F5] text-[10px] px-3 py-1 rounded-full border border-white/10 font-mono shadow-sm">
           {coords.lat >= 0 ? `${coords.lat}°N` : `${Math.abs(coords.lat)}°S`}, {coords.lng >= 0 ? `${coords.lng}°E` : `${Math.abs(coords.lng)}°W`}
         </div>
         <button
           onClick={() => setIsRotating(!isRotating)}
-          className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full border border-gray-200 cursor-pointer"
+          className="bg-white/85 dark:bg-[#0B2533]/85 hover:bg-white text-[#0B3A4A] dark:text-[#E4F4F5] text-[10px] font-semibold px-2.5 py-1 rounded-full border border-gray-200 dark:border-[#1FB6C9]/20 shadow-sm cursor-pointer"
         >
           {isRotating ? 'Pause' : 'Rotate'}
         </button>
