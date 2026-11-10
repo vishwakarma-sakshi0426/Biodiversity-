@@ -102,15 +102,15 @@ export const Hero: React.FC<HeroProps> = ({
             {dict?.heroEyebrow || 'GLOBAL WILDLIFE INTELLIGENCE'}
           </div>
 
-          {/* Cormorant Garamond Main Headline */}
-          <h1 className={`font-serif text-5xl sm:text-6xl lg:text-[68px] font-normal leading-[1.08] tracking-tight ${
+          {/* Cormorant Garamond Main Headline (User Request: Bold, remove wavy line) */}
+          <h1 className={`font-serif text-5xl sm:text-6xl lg:text-[68px] font-bold leading-[1.08] tracking-tight ${
             darkMode ? 'text-white' : 'text-[#0B3A4A]'
           }`}>
             {dict?.heroTitleLine1 || 'Protect the wild.'}
             <br />
-            <span className={`italic font-light relative ${darkMode ? 'text-[#E4F4F5]' : 'text-[#0B3A4A]'}`}>
+            <span className={`italic font-bold relative ${darkMode ? 'text-[#E4F4F5]' : 'text-[#0B3A4A]'}`}>
               {dict?.heroTitleLine2Pre || 'Preserve our '}
-              <span className="text-[#1FB6C9] underline decoration-[#FF7E6B]/50 decoration-wavy decoration-2">
+              <span className="text-[#1FB6C9]">
                 {dict?.heroTitleLine2Highlight || 'living Earth.'}
               </span>
             </span>

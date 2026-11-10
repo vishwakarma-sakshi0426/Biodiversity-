@@ -153,3 +153,4 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationDictionary> = {
     lightMode: 'Mode Terang'
   }
 };
+
