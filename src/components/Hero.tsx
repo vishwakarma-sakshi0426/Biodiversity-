@@ -87,6 +87,10 @@ export const Hero: React.FC<HeroProps> = ({
     }
   };
 
+  const handleNextWallpaper = () => {
+    setActiveWallpaperIdx(prev => (prev + 1) % NATURE_WALLPAPERS.length);
+  };
+
   return (
     <section className={`relative min-h-[94vh] w-full flex items-center overflow-hidden pt-20 pb-12 transition-colors duration-300 ${
       darkMode ? 'text-[#E4F4F5]' : 'text-[#3A5A64]'
@@ -205,14 +209,15 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Prominent 3D Earth */}
-        <div className="lg:col-span-7 relative h-[520px] sm:h-[600px] lg:h-[650px] w-full flex items-center justify-center lg:translate-x-4">
-          <div className="w-full h-full relative bg-transparent">
+        {/* Right Column: Prominent 3D Earth (Roomy container preventing zoom clipping) */}
+        <div className="lg:col-span-7 relative h-[560px] sm:h-[640px] lg:h-[720px] xl:h-[760px] w-full flex items-center justify-center lg:translate-x-4 overflow-visible">
+          <div className="w-full h-full relative bg-transparent overflow-visible">
             <EarthGlobe
               hotspots={hotspots}
               incidents={incidents}
               onNavigateToDetect={onNavigateToDetect}
               onRotationChange={(wpIdx) => setActiveWallpaperIdx(wpIdx)}
+              onNextWallpaper={handleNextWallpaper}
               className="w-full h-full"
             />
           </div>

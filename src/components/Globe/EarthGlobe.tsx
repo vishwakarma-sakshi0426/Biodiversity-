@@ -14,6 +14,7 @@ interface EarthGlobeProps {
   className?: string;
   onNavigateToDetect?: () => void;
   onRotationChange?: (wallpaperIndex: number) => void;
+  onNextWallpaper?: () => void;
 }
 
 interface ActivePopCardData {
@@ -119,23 +120,18 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   hotspots,
   incidents,
   className = '',
-  onRotationChange
+  onRotationChange,
+  onNextWallpaper
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const onRotationChangeRef = useRef(onRotationChange);
   onRotationChangeRef.current = onRotationChange;
+  const onNextWallpaperRef = useRef(onNextWallpaper);
+  onNextWallpaperRef.current = onNextWallpaper;
   const lastWpIndexRef = useRef<number>(0);
 
   // Dynamic pop card positioned near clicked marker (Opens on CLICK, not hover)
   const [activePopCard, setActivePopCard] = useState<ActivePopCardData | null>(null);
-
-  // Minimal pin title tag under cursor on hover
-  const [hoveredMarkerTitle, setHoveredMarkerTitle] = useState<{
-    x: number;
-    y: number;
-    title: string;
-    type: 'hotspot' | 'incident';
-  } | null>(null);
 
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
   const [isRotating, setIsRotating] = useState<boolean>(true);
@@ -157,14 +153,19 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   // Drag & Zoom State
   const isDraggingRef = useRef<boolean>(false);
   const dragDistanceRef = useRef<number>(0);
+  const dragDeltaAccumulatorRef = useRef<number>(0);
   const previousMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   
-  // Starting Camera Distance & Balanced Earth Size (User Request: "starting mein earth jada badi na ho is size ki ho")
-  const targetCameraDistanceRef = useRef<number>(3.65);
-  const currentCameraDistanceRef = useRef<number>(3.65);
+  // Safe Camera Distance & Balanced Earth Size so it NEVER clips or gets cut off
+  const MIN_CAMERA_DIST = 2.45;
+  const MAX_CAMERA_DIST = 4.6;
+  const DEFAULT_CAMERA_DIST = 3.55;
+
+  const targetCameraDistanceRef = useRef<number>(DEFAULT_CAMERA_DIST);
+  const currentCameraDistanceRef = useRef<number>(DEFAULT_CAMERA_DIST);
   const targetRotationRef = useRef<{ x: number; y: number }>({ x: 0.22, y: -0.6 });
 
-  const GLOBE_RADIUS = 1.38;
+  const GLOBE_RADIUS = 1.30;
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -176,8 +177,8 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 0.18, currentCameraDistanceRef.current);
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+    camera.position.set(0, 0.12, currentCameraDistanceRef.current);
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({
@@ -291,10 +292,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           earthGroupRef.current.rotation.x += (targetRotationRef.current.x - earthGroupRef.current.rotation.x) * 0.04;
         }
 
-        // Synchronize nature wallpaper segment
+        // Synchronize nature wallpaper segment (7 distinct wallpapers)
         const rotY = earthGroupRef.current.rotation.y;
         const normalized = ((rotY % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        const wpIndex = Math.floor(normalized / ((Math.PI * 2) / 5)) % 5;
+        const wpIndex = Math.floor(normalized / ((Math.PI * 2) / 7)) % 7;
         if (lastWpIndexRef.current !== wpIndex) {
           lastWpIndexRef.current = wpIndex;
           onRotationChangeRef.current?.(wpIndex);
@@ -317,7 +318,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         }
       });
 
-      // Hover Raycasting: Highlights pin under cursor, does NOT trigger the full pop card!
+      // Hover Raycasting: Changes cursor to pointer on pins, NO text/popup on hover per user request
       if (cameraRef.current && earthGroupRef.current) {
         raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
         const interactiveObjects = [
@@ -329,37 +330,8 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
         if (intersects.length > 0) {
           container.style.cursor = 'pointer';
-          let hitObj: THREE.Object3D | null = intersects[0].object;
-          while (hitObj && !hitObj.userData.markerType && hitObj.parent) {
-            hitObj = hitObj.parent;
-          }
-
-          if (hitObj && hitObj.userData) {
-            const screenPos = intersects[0].point.clone().project(cameraRef.current);
-            const px = ((screenPos.x + 1) / 2) * container.clientWidth;
-            const py = ((-screenPos.y + 1) / 2) * container.clientHeight;
-
-            if (hitObj.userData.markerType === 'hotspot') {
-              const item = hitObj.userData.data as HotspotType;
-              setHoveredMarkerTitle({
-                x: px,
-                y: py,
-                title: `${item.name} • Click to inspect`,
-                type: 'hotspot'
-              });
-            } else if (hitObj.userData.markerType === 'incident') {
-              const item = hitObj.userData.data as IncidentType;
-              setHoveredMarkerTitle({
-                x: px,
-                y: py,
-                title: `${item.title} • Click to read news`,
-                type: 'incident'
-              });
-            }
-          }
         } else {
           container.style.cursor = isDraggingRef.current ? 'grabbing' : 'grab';
-          setHoveredMarkerTitle(null);
         }
       }
 
@@ -382,7 +354,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const onContainerWheel = (e: WheelEvent) => {
       e.preventDefault();
       const zoomDelta = e.deltaY * 0.0025;
-      targetCameraDistanceRef.current = Math.max(1.5, Math.min(5.2, targetCameraDistanceRef.current + zoomDelta));
+      targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + zoomDelta));
     };
     container.addEventListener('wheel', onContainerWheel, { passive: false });
 
@@ -525,6 +497,13 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const deltaX = e.clientX - previousMousePositionRef.current.x;
     const deltaY = e.clientY - previousMousePositionRef.current.y;
     dragDistanceRef.current += Math.abs(deltaX) + Math.abs(deltaY);
+    dragDeltaAccumulatorRef.current += Math.abs(deltaX);
+
+    // Manual rotation wallpaper advance: when user rotates by ~75px, advance to next wallpaper!
+    if (dragDeltaAccumulatorRef.current > 75) {
+      dragDeltaAccumulatorRef.current = 0;
+      onNextWallpaperRef.current?.();
+    }
 
     if (earthGroupRef.current) {
       earthGroupRef.current.rotation.y += deltaX * 0.005;
@@ -541,25 +520,30 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
   const handlePointerUp = () => {
     isDraggingRef.current = false;
+    // When completing a distinct manual drag/swipe, trigger next wallpaper
+    if (dragDistanceRef.current > 35) {
+      dragDeltaAccumulatorRef.current = 0;
+      onNextWallpaperRef.current?.();
+    }
   };
 
-  // Zoom Handling: Enhanced sensitivity and broader range (User Request: "earth zoom nahi ho pa rahi aache se")
+  // Safe Zoom Handling: Sphere is never sliced or clipped (User Request: "eart ko zoom karne per aise eart cut ja rahi hai")
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const zoomDelta = e.deltaY * 0.003;
-    targetCameraDistanceRef.current = Math.max(1.65, Math.min(5.2, targetCameraDistanceRef.current + zoomDelta));
+    const zoomDelta = e.deltaY * 0.0025;
+    targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + zoomDelta));
   };
 
   const handleZoomIn = () => {
-    targetCameraDistanceRef.current = Math.max(1.65, targetCameraDistanceRef.current - 0.45);
+    targetCameraDistanceRef.current = Math.max(MIN_CAMERA_DIST, targetCameraDistanceRef.current - 0.35);
   };
 
   const handleZoomOut = () => {
-    targetCameraDistanceRef.current = Math.min(5.2, targetCameraDistanceRef.current + 0.45);
+    targetCameraDistanceRef.current = Math.min(MAX_CAMERA_DIST, targetCameraDistanceRef.current + 0.35);
   };
 
   const handleReset = () => {
-    targetCameraDistanceRef.current = 3.65;
+    targetCameraDistanceRef.current = DEFAULT_CAMERA_DIST;
     targetRotationRef.current = { x: 0.22, y: -0.6 };
     if (earthGroupRef.current) {
       earthGroupRef.current.rotation.x = 0.22;
@@ -671,18 +655,6 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         onDoubleClick={handleZoomIn}
       />
 
-      {/* Direct pin title indicator under cursor on hover */}
-      {hoveredMarkerTitle && !activePopCard && (
-        <div
-          className="absolute pointer-events-none z-30 transform -translate-x-1/2 -translate-y-full pb-2 transition-all duration-75"
-          style={{ left: hoveredMarkerTitle.x, top: hoveredMarkerTitle.y }}
-        >
-          <div className="bg-[#0B3A4A]/95 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-lg border border-white/20 whitespace-nowrap flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${hoveredMarkerTitle.type === 'hotspot' ? 'bg-[#00E5FF]' : 'bg-[#FF2D55]'}`} />
-            <span>{hoveredMarkerTitle.title}</span>
-          </div>
-        </div>
-      )}
 
       {/* DYNAMIC POSITIONED POP CARD (Opens on CLICK, placed near clicked marker) */}
       {activePopCard && (
