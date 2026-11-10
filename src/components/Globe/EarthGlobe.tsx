@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { createEarthTexture, createCloudTexture, latLngToVector3 } from './earthTexture';
 import { HotspotType, IncidentType } from '../../types';
-import { MapPin, ShieldAlert, Sparkles, X, ExternalLink, Layers, Eye, EyeOff } from 'lucide-react';
+import { MapPin, X, ExternalLink } from 'lucide-react';
 
 export type SelectedMarkerData = 
   | { type: 'hotspot'; item: HotspotType }
@@ -13,17 +13,63 @@ interface EarthGlobeProps {
   incidents: IncidentType[];
   className?: string;
   onNavigateToDetect?: () => void;
+  onRotationChange?: (wallpaperIndex: number) => void;
+}
+
+// Helper to create high-resolution 3D label sprites right on the Earth
+function createLabelSprite(text: string, color: string): THREE.Sprite {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d')!;
+  canvas.width = 320;
+  canvas.height = 70;
+  ctx.font = 'bold 24px Manrope, sans-serif';
+  const textWidth = ctx.measureText(text).width;
+  const pillW = Math.min(290, textWidth + 32);
+  const pillH = 42;
+  const startX = (canvas.width - pillW) / 2;
+  const startY = (canvas.height - pillH) / 2;
+
+  // Background pill
+  ctx.fillStyle = 'rgba(11, 58, 74, 0.92)';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.roundRect(startX, startY, pillW, pillH, 20);
+  ctx.fill();
+  ctx.stroke();
+
+  // Text
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  const spriteMat = new THREE.SpriteMaterial({
+    map: texture,
+    depthTest: true,
+    transparent: true
+  });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(0.36, 0.08, 1);
+  sprite.position.y = 0.08;
+  return sprite;
 }
 
 export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   hotspots,
   incidents,
   className = '',
-  onNavigateToDetect
+  onNavigateToDetect,
+  onRotationChange
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const onRotationChangeRef = useRef(onRotationChange);
+  onRotationChangeRef.current = onRotationChange;
+  const lastWpIndexRef = useRef<number>(0);
 
-  // Side Pop Card state (Shows at the side of the Earth, never blurring or covering the Earth)
+  // Side Pop Image Card (Initialized with first hotspot for instant visual presence)
   const [activeSideCard, setActiveSideCard] = useState<{
     id: string;
     title: string;
@@ -35,9 +81,23 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     detailsLabel: string;
     detailsValue: string;
     articleUrl?: string;
-  } | null>(null);
+  } | null>(() => {
+    const first = hotspots[0];
+    if (!first) return null;
+    return {
+      id: first.id,
+      title: first.name,
+      type: 'hotspot',
+      subtitle: `${first.country} • ${first.region}`,
+      image: first.image || first.species[0]?.image || '',
+      badge: `Threat: ${first.threatLevel}`,
+      description: first.description,
+      detailsLabel: 'Endangered Wildlife',
+      detailsValue: first.species.map(s => s.name).join(', ')
+    };
+  });
 
-  // Hover indicator directly on cursor
+  // Direct hover indicator tag under cursor
   const [hoveredMarkerTitle, setHoveredMarkerTitle] = useState<{
     x: number;
     y: number;
@@ -164,7 +224,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     earthGroup.add(hotspotMarkersRef.current);
     earthGroup.add(incidentMarkersRef.current);
 
-    // Lights
+    // Lighting
     const ambientLight = new THREE.AmbientLight(0xE4F4F5, 0.8);
     scene.add(ambientLight);
 
@@ -188,9 +248,20 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         cloudMeshRef.current.rotation.y += 0.0005;
       }
 
-      if (earthGroupRef.current && !isDraggingRef.current && isRotating) {
-        earthGroupRef.current.rotation.y += 0.0014;
-        earthGroupRef.current.rotation.x += (targetRotationRef.current.x - earthGroupRef.current.rotation.x) * 0.04;
+      if (earthGroupRef.current) {
+        if (!isDraggingRef.current && isRotating) {
+          earthGroupRef.current.rotation.y += 0.0014;
+          earthGroupRef.current.rotation.x += (targetRotationRef.current.x - earthGroupRef.current.rotation.x) * 0.04;
+        }
+
+        // Notify rotation segment for background nature wallpaper synchronization
+        const rotY = earthGroupRef.current.rotation.y;
+        const normalized = ((rotY % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        const wpIndex = Math.floor(normalized / ((Math.PI * 2) / 5)) % 5;
+        if (lastWpIndexRef.current !== wpIndex) {
+          lastWpIndexRef.current = wpIndex;
+          onRotationChangeRef.current?.(wpIndex);
+        }
       }
 
       if (cameraRef.current) {
@@ -307,7 +378,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
   }, []);
 
-  // Update Markers
+  // Update Markers and add 3D Label Sprites directly on Earth
   useEffect(() => {
     while (hotspotMarkersRef.current.children.length > 0) {
       hotspotMarkersRef.current.remove(hotspotMarkersRef.current.children[0]);
@@ -317,7 +388,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     }
     rippleRingsRef.current = [];
 
-    // Hotspot Markers (Turquoise #1FB6C9)
+    // Hotspot Markers (Turquoise #1FB6C9) with 3D Name Labels on the Earth
     if (showHotspots) {
       hotspots.forEach(hotspot => {
         const markerGroup = new THREE.Group();
@@ -329,18 +400,21 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const normal = pos.clone().normalize();
         markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
+        // Core Pin
         const pinGeo = new THREE.SphereGeometry(0.026, 16, 16);
         const pinMat = new THREE.MeshBasicMaterial({ color: 0x1FB6C9 });
         const pinMesh = new THREE.Mesh(pinGeo, pinMat);
         pinMesh.position.y = 0.04;
         markerGroup.add(pinMesh);
 
+        // Stem
         const stemGeo = new THREE.CylinderGeometry(0.005, 0.008, 0.04, 8);
         const stemMat = new THREE.MeshBasicMaterial({ color: 0x2F7D58 });
         const stemMesh = new THREE.Mesh(stemGeo, stemMat);
         stemMesh.position.y = 0.02;
         markerGroup.add(stemMesh);
 
+        // Ripple Ring
         const ringGeo = new THREE.RingGeometry(0.02, 0.04, 24);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0x52CFDF,
@@ -353,11 +427,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         markerGroup.add(ringMesh);
         rippleRingsRef.current.push(ringMesh);
 
+        // 3D Name Label right at the mark on the Earth
+        const shortName = hotspot.name.replace(' Hotspot', '');
+        const labelSprite = createLabelSprite(shortName, '#1FB6C9');
+        markerGroup.add(labelSprite);
+
         hotspotMarkersRef.current.add(markerGroup);
       });
     }
 
-    // Incident Markers (Coral #FF7E6B)
+    // Incident Markers (Coral #FF7E6B) with 3D Name Labels on the Earth
     if (showIncidents) {
       incidents.forEach(incident => {
         const markerGroup = new THREE.Group();
@@ -369,18 +448,21 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const normal = pos.clone().normalize();
         markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
+        // Coral Diamond Pin
         const diamondGeo = new THREE.OctahedronGeometry(0.028, 0);
         const diamondMat = new THREE.MeshBasicMaterial({ color: 0xFF7E6B });
         const diamondMesh = new THREE.Mesh(diamondGeo, diamondMat);
         diamondMesh.position.y = 0.045;
         markerGroup.add(diamondMesh);
 
+        // Stem
         const stemGeo = new THREE.CylinderGeometry(0.005, 0.008, 0.04, 8);
         const stemMat = new THREE.MeshBasicMaterial({ color: 0xE86350 });
         const stemMesh = new THREE.Mesh(stemGeo, stemMat);
         stemMesh.position.y = 0.02;
         markerGroup.add(stemMesh);
 
+        // Warning Pulse Ring
         const ringGeo = new THREE.RingGeometry(0.022, 0.044, 24);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0xFF7E6B,
@@ -392,6 +474,11 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         ringMesh.rotation.x = Math.PI / 2;
         markerGroup.add(ringMesh);
         rippleRingsRef.current.push(ringMesh);
+
+        // 3D Name Label right at the mark on the Earth
+        const shortIncidentName = incident.country + ' Seizure';
+        const labelSprite = createLabelSprite(shortIncidentName, '#FF7E6B');
+        markerGroup.add(labelSprite);
 
         incidentMarkersRef.current.add(markerGroup);
       });
@@ -478,7 +565,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         onWheel={handleWheel}
       />
 
-      {/* Cursor Pin Name Tooltip directly at pointer */}
+      {/* Direct pin title indicator under cursor */}
       {hoveredMarkerTitle && (
         <div
           className="absolute pointer-events-none z-30 transform -translate-x-1/2 -translate-y-full pb-2 transition-all duration-75"
@@ -491,7 +578,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       )}
 
-      {/* POP IMAGE SIDE CARD (Prompt Requirement: "cursor waha jaye toh pop image us place ki aaye with name but earth ke side mein not usko bur ksr ke uske uper") */}
+      {/* POP IMAGE SIDE CARD (Side of the Earth, never blurring or covering the Earth) */}
       {activeSideCard && (
         <div className="absolute top-4 left-4 z-30 w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-[28px] p-4 shadow-2xl border border-[#1FB6C9]/25 text-[#3A5A64] animate-in slide-in-from-left duration-200">
           <div className="relative h-40 w-full rounded-2xl overflow-hidden mb-3 bg-black/10">
@@ -504,7 +591,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             {/* Top Close Button */}
             <button
               onClick={() => setActiveSideCard(null)}
-              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-colors"
+              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-colors cursor-pointer"
               title="Close Preview"
             >
               <X className="w-3.5 h-3.5" />
@@ -566,7 +653,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         <div className="bg-white/85 backdrop-blur-md p-1.5 rounded-full border border-[#1FB6C9]/25 shadow-sm flex items-center gap-1.5 text-xs">
           <button
             onClick={() => setShowHotspots(!showHotspots)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
               showHotspots
                 ? 'bg-[#E4F4F5] text-[#0B3A4A] border border-[#1FB6C9]/30'
                 : 'text-gray-400'
@@ -577,7 +664,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           </button>
           <button
             onClick={() => setShowIncidents(!showIncidents)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
               showIncidents
                 ? 'bg-[#FF7E6B]/15 text-[#E86350] border border-[#FF7E6B]/30'
                 : 'text-gray-400'
@@ -592,25 +679,25 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         <div className="hidden sm:flex flex-wrap justify-end gap-1 max-w-xs">
           <button
             onClick={() => jumpToRegion(16.5, 101.0)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Indo-Burma
           </button>
           <button
             onClick={() => jumpToRegion(-18.7, 46.8)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Madagascar
           </button>
           <button
             onClick={() => jumpToRegion(-0.8, 113.9)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Sundaland
           </button>
           <button
             onClick={() => jumpToRegion(-9.2, -75.0)}
-            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100"
+            className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-gray-100 cursor-pointer"
           >
             Andes
           </button>
@@ -624,7 +711,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
         <button
           onClick={() => setIsRotating(!isRotating)}
-          className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full border border-gray-200"
+          className="bg-white/80 hover:bg-white text-[#0B3A4A] text-[10px] font-medium px-2.5 py-1 rounded-full border border-gray-200 cursor-pointer"
         >
           {isRotating ? 'Pause' : 'Rotate'}
         </button>
