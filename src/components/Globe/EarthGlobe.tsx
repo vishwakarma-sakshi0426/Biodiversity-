@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { createEarthTexture, createCloudTexture, latLngToVector3 } from './earthTexture';
 import { HotspotType, IncidentType } from '../../types';
-import { MapPin, X, ExternalLink } from 'lucide-react';
+import { MapPin, X, ExternalLink, ChevronDown, ChevronUp, Scale, Building2, Newspaper } from 'lucide-react';
 
 export type SelectedMarkerData = 
   | { type: 'hotspot'; item: HotspotType }
@@ -16,7 +16,25 @@ interface EarthGlobeProps {
   onRotationChange?: (wallpaperIndex: number) => void;
 }
 
-// Helper to create high-resolution 3D label sprites right on the Earth
+interface ActivePopCardData {
+  id: string;
+  type: 'hotspot' | 'incident';
+  title: string;
+  subtitle: string;
+  image: string;
+  badge: string;
+  description: string;
+  posX: number;
+  posY: number;
+  // Specific to incident
+  seizureQuantity?: string;
+  sourceOrganization?: string;
+  newsArticleTitle?: string;
+  articleUrl?: string;
+  isExpanded?: boolean;
+}
+
+// 3D Billboard label sprites right on the Earth
 function createLabelSprite(text: string, color: string): THREE.Sprite {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
@@ -61,7 +79,6 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   hotspots,
   incidents,
   className = '',
-  onNavigateToDetect,
   onRotationChange
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,35 +86,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   onRotationChangeRef.current = onRotationChange;
   const lastWpIndexRef = useRef<number>(0);
 
-  // Side Pop Image Card (Initialized with first hotspot for instant visual presence)
-  const [activeSideCard, setActiveSideCard] = useState<{
-    id: string;
-    title: string;
-    type: 'hotspot' | 'incident';
-    subtitle: string;
-    image: string;
-    badge: string;
-    description: string;
-    detailsLabel: string;
-    detailsValue: string;
-    articleUrl?: string;
-  } | null>(() => {
-    const first = hotspots[0];
-    if (!first) return null;
-    return {
-      id: first.id,
-      title: first.name,
-      type: 'hotspot',
-      subtitle: `${first.country} • ${first.region}`,
-      image: first.image || first.species[0]?.image || '',
-      badge: `Threat: ${first.threatLevel}`,
-      description: first.description,
-      detailsLabel: 'Endangered Wildlife',
-      detailsValue: first.species.map(s => s.name).join(', ')
-    };
-  });
+  // Dynamic pop card positioned near clicked marker (Prompt Requirement: opens on CLICK, not hover, and positioned dynamically near marker)
+  const [activePopCard, setActivePopCard] = useState<ActivePopCardData | null>(null);
 
-  // Direct hover indicator tag under cursor
+  // Minimal pin title tag under cursor on hover
   const [hoveredMarkerTitle, setHoveredMarkerTitle] = useState<{
     x: number;
     y: number;
@@ -124,6 +116,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
   // Drag Interaction State
   const isDraggingRef = useRef<boolean>(false);
+  const dragDistanceRef = useRef<number>(0);
   const previousMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const targetCameraDistanceRef = useRef<number>(3.3);
   const currentCameraDistanceRef = useRef<number>(3.3);
@@ -279,7 +272,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         }
       });
 
-      // Hover Raycasting
+      // Hover Raycasting: ONLY changes cursor and shows tiny indicator tag, does NOT trigger the full pop card!
       if (cameraRef.current && earthGroupRef.current) {
         raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
         const interactiveObjects = [
@@ -306,43 +299,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
               setHoveredMarkerTitle({
                 x: px,
                 y: py,
-                title: item.name,
+                title: `${item.name} (Click to inspect)`,
                 type: 'hotspot'
-              });
-
-              // Automatically display Side Pop Image Card
-              setActiveSideCard({
-                id: item.id,
-                title: item.name,
-                type: 'hotspot',
-                subtitle: `${item.country} • ${item.region}`,
-                image: item.image || item.species[0]?.image || 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17',
-                badge: `Threat: ${item.threatLevel}`,
-                description: item.description,
-                detailsLabel: 'Endangered Wildlife',
-                detailsValue: item.species.map(s => s.name).join(', ')
               });
             } else if (hitObj.userData.markerType === 'incident') {
               const item = hitObj.userData.data as IncidentType;
               setHoveredMarkerTitle({
                 x: px,
                 y: py,
-                title: item.title,
+                title: `${item.title} (Click to read news)`,
                 type: 'incident'
-              });
-
-              // Automatically display Side Pop Image Card
-              setActiveSideCard({
-                id: item.id,
-                title: item.title,
-                type: 'incident',
-                subtitle: `${item.locationName}, ${item.country} (${item.date})`,
-                image: item.image || 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17',
-                badge: item.category,
-                description: item.description,
-                detailsLabel: 'Seizure Volume',
-                detailsValue: item.seizureQuantity,
-                articleUrl: item.articleUrl
               });
             }
           }
@@ -378,7 +344,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
   }, []);
 
-  // Update Markers and add 3D Label Sprites directly on Earth
+  // Update Markers with 3D Name Labels on the Earth
   useEffect(() => {
     while (hotspotMarkersRef.current.children.length > 0) {
       hotspotMarkersRef.current.remove(hotspotMarkersRef.current.children[0]);
@@ -491,6 +457,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   // Pointer & Drag Handlers
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     isDraggingRef.current = true;
+    dragDistanceRef.current = 0;
     previousMousePositionRef.current = { x: e.clientX, y: e.clientY };
   };
 
@@ -515,6 +482,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
     const deltaX = e.clientX - previousMousePositionRef.current.x;
     const deltaY = e.clientY - previousMousePositionRef.current.y;
+    dragDistanceRef.current += Math.abs(deltaX) + Math.abs(deltaY);
 
     if (earthGroupRef.current) {
       earthGroupRef.current.rotation.y += deltaX * 0.005;
@@ -537,6 +505,83 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     e.preventDefault();
     const zoomDelta = e.deltaY * 0.0015;
     targetCameraDistanceRef.current = Math.max(2.1, Math.min(4.8, targetCameraDistanceRef.current + zoomDelta));
+  };
+
+  // Click Handler: ONLY on CLICK does the pop card appear (Prompt Requirement)
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If it was a drag, don't trigger click
+    if (dragDistanceRef.current > 6) return;
+    if (!containerRef.current || !cameraRef.current || !earthGroupRef.current) return;
+
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    mouseRef.current.set(x, y);
+
+    raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+    const interactiveObjects = [
+      ...hotspotMarkersRef.current.children,
+      ...incidentMarkersRef.current.children
+    ].filter(obj => obj.visible);
+
+    const intersects = raycasterRef.current.intersectObjects(interactiveObjects, true);
+
+    if (intersects.length > 0) {
+      let hitObj: THREE.Object3D | null = intersects[0].object;
+      while (hitObj && !hitObj.userData.markerType && hitObj.parent) {
+        hitObj = hitObj.parent;
+      }
+
+      if (hitObj && hitObj.userData) {
+        const screenPos = intersects[0].point.clone().project(cameraRef.current);
+        const px = ((screenPos.x + 1) / 2) * container.clientWidth;
+        const py = ((-screenPos.y + 1) / 2) * container.clientHeight;
+
+        // Position pop card dynamically near the marker, safely clamped within container bounds
+        const cardWidth = 320;
+        const cardHeight = 320;
+        let targetX = px > container.clientWidth * 0.5 ? px - cardWidth - 20 : px + 24;
+        let targetY = Math.max(20, Math.min(container.clientHeight - cardHeight - 20, py - 90));
+        targetX = Math.max(16, Math.min(container.clientWidth - cardWidth - 16, targetX));
+
+        if (hitObj.userData.markerType === 'hotspot') {
+          const item = hitObj.userData.data as HotspotType;
+          setActivePopCard({
+            id: item.id,
+            type: 'hotspot',
+            title: item.name,
+            subtitle: `${item.country} • ${item.region}`,
+            image: item.image || item.species[0]?.image || 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17',
+            badge: `Threat: ${item.threatLevel}`,
+            description: item.description,
+            posX: targetX,
+            posY: targetY
+          });
+        } else if (hitObj.userData.markerType === 'incident') {
+          const item = hitObj.userData.data as IncidentType;
+          setActivePopCard({
+            id: item.id,
+            type: 'incident',
+            title: item.title,
+            subtitle: `${item.locationName}, ${item.country} • ${item.date}`,
+            image: item.image || 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17',
+            badge: item.category,
+            description: item.description,
+            seizureQuantity: item.seizureQuantity,
+            sourceOrganization: item.sourceOrganization,
+            newsArticleTitle: item.newsArticleTitle,
+            articleUrl: item.articleUrl,
+            posX: targetX,
+            posY: targetY,
+            isExpanded: false
+          });
+        }
+      }
+    } else {
+      // Clicked on empty space: close open pop card
+      setActivePopCard(null);
+    }
   };
 
   // Jump to region helper
@@ -563,10 +608,11 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         onWheel={handleWheel}
+        onClick={handleClick}
       />
 
-      {/* Direct pin title indicator under cursor */}
-      {hoveredMarkerTitle && (
+      {/* Direct pin title indicator under cursor on hover */}
+      {hoveredMarkerTitle && !activePopCard && (
         <div
           className="absolute pointer-events-none z-30 transform -translate-x-1/2 -translate-y-full pb-2 transition-all duration-75"
           style={{ left: hoveredMarkerTitle.x, top: hoveredMarkerTitle.y }}
@@ -578,73 +624,160 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       )}
 
-      {/* POP IMAGE SIDE CARD (Side of the Earth, never blurring or covering the Earth) */}
-      {activeSideCard && (
-        <div className="absolute top-4 left-4 z-30 w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-[28px] p-4 shadow-2xl border border-[#1FB6C9]/25 text-[#3A5A64] animate-in slide-in-from-left duration-200">
-          <div className="relative h-40 w-full rounded-2xl overflow-hidden mb-3 bg-black/10">
-            <img
-              src={activeSideCard.image}
-              alt={activeSideCard.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-            {/* Top Close Button */}
-            <button
-              onClick={() => setActiveSideCard(null)}
-              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-colors cursor-pointer"
-              title="Close Preview"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+      {/* DYNAMIC POSITIONED POP CARD (Opens on CLICK, placed near clicked marker, distinct styling for Green vs Red) */}
+      {activePopCard && (
+        <div
+          className={`absolute z-30 transition-all duration-200 ease-out animate-in zoom-in-95 fade-in ${
+            activePopCard.isExpanded ? 'w-80 sm:w-96' : 'w-72 sm:w-80'
+          }`}
+          style={{ left: activePopCard.posX, top: activePopCard.posY }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* A. GREEN/TURQUOISE HOTSPOT POP CARD: Minimal & Pure (Just Pic, Name, 1-Line Description) */}
+          {activePopCard.type === 'hotspot' && (
+            <div className="bg-white/95 backdrop-blur-md rounded-[26px] p-3.5 shadow-2xl border border-[#1FB6C9]/35 text-[#3A5A64]">
+              {/* Photo */}
+              <div className="relative h-36 w-full rounded-2xl overflow-hidden mb-2.5 bg-black/10">
+                <img
+                  src={activePopCard.image}
+                  alt={activePopCard.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <button
+                  onClick={() => setActivePopCard(null)}
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/55 hover:bg-black/80 text-white flex items-center justify-center transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <div className="absolute bottom-2 left-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white bg-[#1FB6C9] shadow-sm">
+                    Biodiversity Hotspot
+                  </span>
+                </div>
+              </div>
 
-            {/* Type Badge */}
-            <div className="absolute bottom-2 left-2">
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ${
-                  activeSideCard.type === 'hotspot' ? 'bg-[#1FB6C9]' : 'bg-[#FF7E6B]'
-                }`}
-              >
-                {activeSideCard.type === 'hotspot' ? 'Biodiversity Hotspot' : 'Documented Seizure'}
-              </span>
+              {/* Name */}
+              <h3 className="font-serif text-lg font-medium text-[#0B3A4A] leading-snug">
+                {activePopCard.title}
+              </h3>
+              <p className="text-[11px] text-[#6E8890] mt-0.5 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-[#1FB6C9] shrink-0" />
+                <span className="truncate">{activePopCard.subtitle}</span>
+              </p>
+
+              {/* Exact 1-Line Description (User Request: "baki ki just pic and name and 1 line discepition") */}
+              <p className="text-xs text-[#3A5A64] mt-2 leading-relaxed line-clamp-1 border-t border-gray-100 pt-2 font-medium">
+                {activePopCard.description}
+              </p>
             </div>
-          </div>
+          )}
 
-          <h3 className="font-serif text-xl font-medium text-[#0B3A4A] leading-snug">
-            {activeSideCard.title}
-          </h3>
-          <p className="text-xs text-[#6E8890] mt-0.5 flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-[#1FB6C9] shrink-0" />
-            <span className="truncate">{activeSideCard.subtitle}</span>
-          </p>
+          {/* B. RED/CORAL INCIDENT POP CARD: News & Seizure Intelligence with "Read More" Toggle */}
+          {activePopCard.type === 'incident' && (
+            <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-4 shadow-2xl border border-[#FF7E6B]/40 text-[#3A5A64] space-y-2.5">
+              {/* Header Image */}
+              <div className="relative h-36 w-full rounded-2xl overflow-hidden bg-black/10">
+                <img
+                  src={activePopCard.image}
+                  alt={activePopCard.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <button
+                  onClick={() => setActivePopCard(null)}
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/55 hover:bg-black/80 text-white flex items-center justify-center transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white bg-[#FF7E6B] shadow-sm">
+                    Documented Seizure
+                  </span>
+                </div>
+              </div>
 
-          <p className="text-xs text-[#3A5A64] mt-2 leading-relaxed line-clamp-2">
-            {activeSideCard.description}
-          </p>
+              {/* Title & Location */}
+              <div>
+                <h3 className="font-serif text-lg font-medium text-[#0B3A4A] leading-snug">
+                  {activePopCard.title}
+                </h3>
+                <p className="text-[11px] text-[#6E8890] mt-0.5 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-[#FF7E6B] shrink-0" />
+                  <span className="truncate">{activePopCard.subtitle}</span>
+                </p>
+              </div>
 
-          <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px]">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-[#6E8890] block">
-                {activeSideCard.detailsLabel}
-              </span>
-              <span className="font-medium text-[#0B3A4A] truncate max-w-[170px] block">
-                {activeSideCard.detailsValue}
-              </span>
-            </div>
-            {activeSideCard.articleUrl ? (
-              <a
-                href={activeSideCard.articleUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[#FF7E6B] font-semibold hover:underline"
+              {/* Seizure Metric Box */}
+              <div className="p-2.5 rounded-xl bg-[#F7F2E7] border border-[#FF7E6B]/20 text-xs">
+                <span className="text-[9px] uppercase font-bold tracking-wider text-[#E86350] flex items-center gap-1">
+                  <Scale className="w-3 h-3" /> Confiscated Volume
+                </span>
+                <span className="font-serif text-sm font-semibold text-[#0B3A4A] block mt-0.5">
+                  {activePopCard.seizureQuantity}
+                </span>
+              </div>
+
+              {/* News Headline Banner */}
+              {activePopCard.newsArticleTitle && (
+                <div className="p-2 rounded-xl bg-[#0B3A4A]/5 border border-gray-100 text-[11px]">
+                  <span className="text-[9px] uppercase font-bold text-[#6E8890] flex items-center gap-1">
+                    <Newspaper className="w-3 h-3 text-[#1FB6C9]" /> Verified Media Dispatch
+                  </span>
+                  <p className="font-medium text-[#0B3A4A] line-clamp-1 mt-0.5">
+                    "{activePopCard.newsArticleTitle}"
+                  </p>
+                </div>
+              )}
+
+              {/* Read More Expanded Section (User Request: "red walo mien read more so woh thoda bade hojaye") */}
+              {activePopCard.isExpanded && (
+                <div className="pt-2 border-t border-gray-100 space-y-2 text-xs animate-in fade-in duration-200">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[#6E8890] block">
+                      Case Dossier Summary
+                    </span>
+                    <p className="text-[#3A5A64] text-[11px] leading-relaxed mt-0.5">
+                      {activePopCard.description}
+                    </p>
+                  </div>
+
+                  {activePopCard.sourceOrganization && (
+                    <div className="flex items-center gap-1 text-[11px] text-[#6E8890]">
+                      <Building2 className="w-3.5 h-3.5 text-[#1FB6C9] shrink-0" />
+                      <span className="truncate font-medium">{activePopCard.sourceOrganization}</span>
+                    </div>
+                  )}
+
+                  {activePopCard.articleUrl && (
+                    <div className="pt-1">
+                      <a
+                        href={activePopCard.articleUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF7E6B] text-white text-[11px] font-semibold hover:bg-[#E86350] shadow-sm transition-all"
+                      >
+                        Read Verified Source Report <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Read More Toggle Button */}
+              <button
+                onClick={() =>
+                  setActivePopCard(prev => (prev ? { ...prev, isExpanded: !prev.isExpanded } : null))
+                }
+                className="w-full py-1.5 rounded-xl bg-gray-100 hover:bg-[#E4F4F5] text-[#0B3A4A] text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
               >
-                Source <ExternalLink className="w-3 h-3" />
-              </a>
-            ) : (
-              <span className="text-[#1FB6C9] font-medium text-[10px]">
-                {activeSideCard.badge}
-              </span>
-            )}
-          </div>
+                <span>{activePopCard.isExpanded ? 'Show Less' : 'Read More Details'}</span>
+                {activePopCard.isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

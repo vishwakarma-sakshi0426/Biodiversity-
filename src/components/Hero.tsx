@@ -62,34 +62,33 @@ export const Hero: React.FC<HeroProps> = ({
 
   return (
     <section className="relative min-h-[96vh] w-full flex items-center overflow-hidden pt-20 pb-12">
-      {/* Dynamic Nature Wallpapers Layer (Smooth Cross-fade as Earth Rotates) */}
+      {/* Dynamic Nature Wallpapers Layer (Clear visibility across both left & right sides) */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         {NATURE_WALLPAPERS.map((wp, idx) => (
           <div
             key={idx}
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
-              activeWallpaperIdx === idx ? 'opacity-85' : 'opacity-0'
+              activeWallpaperIdx === idx ? 'opacity-95' : 'opacity-0'
             }`}
             style={{ backgroundImage: `url(${wp.url})` }}
           />
         ))}
 
-        {/* Coralis Soft Sand & Mist Gradient Overlay (Ensures Text Legibility on Left, Open View for Earth on Right) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F2E7] via-[#F7F2E7]/85 to-transparent lg:w-3/5" />
-        <div className="absolute inset-0 bg-[#F7F2E7]/25 backdrop-blur-[1px]" />
+        {/* Minimal gradient so wallpaper is clearly visible on left side without heavy white washout */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-transparent to-black/10 pointer-events-none" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[82vh]">
-        {/* Left Column: Editorial Content (Coralis Typography & Layout) */}
-        <div className="lg:col-span-5 space-y-6 lg:pr-4 text-left">
+        {/* Left Column: Editorial Content with sleek translucent glass backing */}
+        <div className="lg:col-span-5 space-y-6 lg:pr-4 text-left p-6 sm:p-8 rounded-[36px] bg-[#F7F2E7]/80 backdrop-blur-md border border-white/70 shadow-2xl">
           {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E4F4F5]/90 backdrop-blur-md border border-[#1FB6C9]/30 text-[#0B3A4A] text-xs font-bold uppercase tracking-widest shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E4F4F5] border border-[#1FB6C9]/30 text-[#0B3A4A] text-xs font-bold uppercase tracking-widest shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#1FB6C9] animate-pulse" />
             GLOBAL WILDLIFE INTELLIGENCE
           </div>
 
           {/* Cormorant Garamond Main Headline */}
-          <h1 className="font-serif text-5xl sm:text-6xl lg:text-[68px] font-normal text-[#0B3A4A] leading-[1.08] tracking-tight drop-shadow-sm">
+          <h1 className="font-serif text-5xl sm:text-6xl lg:text-[62px] font-normal text-[#0B3A4A] leading-[1.08] tracking-tight">
             Protect the wild.
             <br />
             <span className="italic font-light text-[#0B3A4A] relative">
@@ -133,12 +132,12 @@ export const Hero: React.FC<HeroProps> = ({
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF7E6B]" /> Seizures (8)
             </span>
             <span className="text-[#6E8890] italic">
-              Hover markers to pop location details
+              Click any pin on Earth to inspect details
             </span>
           </div>
         </div>
 
-        {/* Right Column: Prominent 3D Earth Seamlessly Floating Over Nature Wallpaper (No Blue Box Container) */}
+        {/* Right Column: Prominent 3D Earth Seamlessly Floating Over Nature Wallpaper */}
         <div className="lg:col-span-7 relative h-[520px] sm:h-[620px] lg:h-[680px] w-full flex items-center justify-center">
           <div className="w-full h-full relative bg-transparent">
             <EarthGlobe
