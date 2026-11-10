@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { AnalysisResult } from '../../types';
-import { BarChart3, TrendingUp, AlertTriangle, CheckCircle, HelpCircle, Filter, Search, Eye, Download, ShieldCheck, PieChart, Activity, Globe2, X } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, HelpCircle, Search, Eye, Download, Activity, Sparkles, X } from 'lucide-react';
 
 interface AnalyticsDashboardProps {
   records: AnalysisResult[];
+  onNavigateToDetect?: () => void;
 }
 
-export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records }) => {
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records, onNavigateToDetect }) => {
   const [filterPrediction, setFilterPrediction] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedInspectRecord, setSelectedInspectRecord] = useState<AnalysisResult | null>(null);
@@ -93,13 +94,25 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records 
           </p>
         </div>
 
-        <button
-          onClick={handleExportCSV}
-          className="self-start md:self-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] text-xs font-semibold shadow-md border border-[#1FB6C9]/30 transition-all hover:scale-105"
-        >
-          <Download className="w-4 h-4 text-[#1FB6C9]" />
-          Export Intelligence Log (CSV)
-        </button>
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          {onNavigateToDetect && (
+            <button
+              onClick={onNavigateToDetect}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF7E6B] hover:bg-[#E86350] text-white text-xs font-semibold shadow-md shadow-[#FF7E6B]/30 transition-all hover:scale-105 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4" />
+              New Content Detection
+            </button>
+          )}
+
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] text-xs font-semibold shadow-md border border-[#1FB6C9]/30 transition-all hover:scale-105 cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-[#1FB6C9]" />
+            Export Intelligence Log (CSV)
+          </button>
+        </div>
       </div>
 
       {/* 7.1 Key Statistics Cards (Coralis Palette Harmony) */}
@@ -508,3 +521,4 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ records 
     </section>
   );
 };
+

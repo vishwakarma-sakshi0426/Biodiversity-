@@ -5,9 +5,13 @@ import { AnalysisResult } from '../../types';
 
 interface DetectionSectionProps {
   onLogAnalysisToDashboard: (record: AnalysisResult) => void;
+  onNavigateToDashboard?: () => void;
 }
 
-export const DetectionSection: React.FC<DetectionSectionProps> = ({ onLogAnalysisToDashboard }) => {
+export const DetectionSection: React.FC<DetectionSectionProps> = ({ 
+  onLogAnalysisToDashboard,
+  onNavigateToDashboard 
+}) => {
   const [activeTab, setActiveTab] = useState<'upload' | 'url'>('upload');
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -579,11 +583,11 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({ onLogAnalysi
               </div>
 
               {/* Dynamic Action: Log to Dashboard Database */}
-              <div className="pt-2">
+              <div className="pt-2 space-y-2">
                 <button
                   onClick={handleLogToDatabase}
                   disabled={hasLoggedToDb}
-                  className={`w-full py-3 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                  className={`w-full py-3 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     hasLoggedToDb
                       ? 'bg-[#2F7D58] text-white shadow-md'
                       : 'bg-[#0B3A4A] hover:bg-[#165367] text-white shadow-md'
@@ -592,7 +596,7 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({ onLogAnalysi
                   {hasLoggedToDb ? (
                     <>
                       <CheckCircle className="w-4 h-4" />
-                      Appended to Intelligence Dashboard Database
+                      Appended to Intelligence Database
                     </>
                   ) : (
                     <>
@@ -601,6 +605,16 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({ onLogAnalysi
                     </>
                   )}
                 </button>
+
+                {hasLoggedToDb && onNavigateToDashboard && (
+                  <button
+                    onClick={onNavigateToDashboard}
+                    className="w-full py-2.5 rounded-full bg-[#1FB6C9] hover:bg-[#1693A3] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer"
+                  >
+                    <span>Inspect Record in Analytics Dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -609,3 +623,4 @@ export const DetectionSection: React.FC<DetectionSectionProps> = ({ onLogAnalysi
     </section>
   );
 };
+

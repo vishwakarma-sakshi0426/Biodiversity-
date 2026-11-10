@@ -8,6 +8,7 @@ export type HotspotType = {
   description: string;
   biodiversitySignificance: string;
   threatLevel: 'Critical' | 'High' | 'Vulnerable';
+  image?: string;
   species: {
     name: string;
     scientificName: string;
@@ -16,13 +17,6 @@ export type HotspotType = {
     citesAppendix: 'Appendix I' | 'Appendix II' | 'Appendix III';
   }[];
   conservationAction: string;
-  youtubeFeed: {
-    title: string;
-    videoId: string;
-    isLive: boolean;
-    channelName: string;
-    fallbackRecordedId?: string;
-  };
 };
 
 export type IncidentCategory = 
@@ -49,6 +43,7 @@ export type IncidentType = {
   newsArticleTitle: string;
   articleUrl: string;
   isVerified: boolean;
+  image?: string;
 };
 
 export type DetectionPrediction = 

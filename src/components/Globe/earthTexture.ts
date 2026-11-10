@@ -262,3 +262,4 @@ export function latLngToVector3(lat: number, lng: number, radius: number): THREE
   const y = radius * Math.cos(phi);
   return new THREE.Vector3(x, y, z);
 }
+

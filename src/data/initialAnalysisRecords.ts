@@ -260,3 +260,4 @@ export const INITIAL_ANALYSIS_RECORDS: AnalysisResult[] = [
     isSample: true
   }
 ];
+
