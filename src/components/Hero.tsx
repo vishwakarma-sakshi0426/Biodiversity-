@@ -61,46 +61,46 @@ export const Hero: React.FC<HeroProps> = ({
   const activeWallpaper = NATURE_WALLPAPERS[activeWallpaperIdx] || NATURE_WALLPAPERS[0];
 
   return (
-    <section className="relative min-h-[96vh] w-full flex items-center overflow-hidden pt-20 pb-12">
-      {/* Dynamic Nature Wallpapers Layer (Clear visibility across both left & right sides) */}
+    <section className="relative min-h-[92vh] w-full flex items-center overflow-hidden pt-20 pb-10">
+      {/* Dynamic Nature Wallpapers Layer (Subtle, delicate tint - User Request: "wallpaper itne jada visible nahi chaiye, jaise white tha thoda kam visibility") */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         {NATURE_WALLPAPERS.map((wp, idx) => (
           <div
             key={idx}
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
-              activeWallpaperIdx === idx ? 'opacity-95' : 'opacity-0'
+              activeWallpaperIdx === idx ? 'opacity-28' : 'opacity-0'
             }`}
             style={{ backgroundImage: `url(${wp.url})` }}
           />
         ))}
 
-        {/* Minimal gradient so wallpaper is clearly visible on left side without heavy white washout */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-transparent to-black/10 pointer-events-none" />
+        {/* Soft Coralis Sand Ambient Wash */}
+        <div className="absolute inset-0 bg-[#F7F2E7]/75 pointer-events-none" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[82vh]">
-        {/* Left Column: Editorial Content with sleek translucent glass backing */}
-        <div className="lg:col-span-5 space-y-6 lg:pr-4 text-left p-6 sm:p-8 rounded-[36px] bg-[#F7F2E7]/80 backdrop-blur-md border border-white/70 shadow-2xl">
-          {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E4F4F5] border border-[#1FB6C9]/30 text-[#0B3A4A] text-xs font-bold uppercase tracking-widest shadow-sm">
+        {/* Left Column: Clean Editorial Headline & Content (User Request: "tagline wala section alag se box mein nahi chaiye just last changes se phele wale jaisa chaiye") */}
+        <div className="lg:col-span-5 space-y-6 lg:pr-4 text-left">
+          {/* Eyebrow Pill Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E4F4F5] border border-[#1FB6C9]/25 text-[#0B3A4A] text-xs font-bold uppercase tracking-widest shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#1FB6C9] animate-pulse" />
             GLOBAL WILDLIFE INTELLIGENCE
           </div>
 
           {/* Cormorant Garamond Main Headline */}
-          <h1 className="font-serif text-5xl sm:text-6xl lg:text-[62px] font-normal text-[#0B3A4A] leading-[1.08] tracking-tight">
+          <h1 className="font-serif text-5xl sm:text-6xl lg:text-[68px] font-normal text-[#0B3A4A] leading-[1.08] tracking-tight">
             Protect the wild.
             <br />
             <span className="italic font-light text-[#0B3A4A] relative">
               Preserve our{' '}
-              <span className="text-[#1FB6C9] underline decoration-[#FF7E6B]/50 decoration-wavy decoration-2">
+              <span className="text-[#1FB6C9] underline decoration-[#FF7E6B]/40 decoration-wavy decoration-2">
                 living Earth.
               </span>
             </span>
           </h1>
 
           {/* Description */}
-          <p className="text-base text-[#3A5A64] font-medium leading-relaxed max-w-lg">
+          <p className="text-base text-[#3A5A64] font-normal leading-relaxed max-w-lg">
             Explore Earth's biodiversity hotspots, uncover reported wildlife crime incidents, and identify the digital traces of illegal wildlife trade.
           </p>
 
@@ -123,22 +123,37 @@ export const Hero: React.FC<HeroProps> = ({
             </button>
           </div>
 
-          {/* Biome Status & Hotspot Telemetry */}
-          <div className="pt-4 border-t border-[#0B3A4A]/10 flex flex-wrap items-center gap-4 text-xs text-[#3A5A64]">
-            <span className="flex items-center gap-1.5 font-semibold text-[#0B3A4A]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1FB6C9]" /> Hotspots (10)
-            </span>
-            <span className="flex items-center gap-1.5 font-semibold text-[#E86350]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FF7E6B]" /> Seizures (8)
-            </span>
-            <span className="text-[#6E8890] italic">
-              Click any pin on Earth to inspect details
-            </span>
+          {/* Stats Bar */}
+          <div className="pt-6 grid grid-cols-3 gap-3 border-t border-[#1FB6C9]/20 max-w-md">
+            <div>
+              <div className="font-serif text-2xl sm:text-3xl font-semibold text-[#0B3A4A]">
+                10+
+              </div>
+              <div className="text-[10px] uppercase font-bold tracking-wider text-[#6E8890] mt-0.5">
+                Hotspots Mapped
+              </div>
+            </div>
+            <div>
+              <div className="font-serif text-2xl sm:text-3xl font-semibold text-[#FF7E6B]">
+                8.8k+
+              </div>
+              <div className="text-[10px] uppercase font-bold tracking-wider text-[#6E8890] mt-0.5">
+                Tonnes Seized
+              </div>
+            </div>
+            <div>
+              <div className="font-serif text-2xl sm:text-3xl font-semibold text-[#1FB6C9]">
+                94%
+              </div>
+              <div className="text-[10px] uppercase font-bold tracking-wider text-[#6E8890] mt-0.5">
+                AI Precision
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Prominent 3D Earth Seamlessly Floating Over Nature Wallpaper */}
-        <div className="lg:col-span-7 relative h-[520px] sm:h-[620px] lg:h-[680px] w-full flex items-center justify-center">
+        {/* Right Column: Prominent 3D Earth (Shifted slightly to the right, balanced size as requested) */}
+        <div className="lg:col-span-7 relative h-[500px] sm:h-[580px] lg:h-[640px] w-full flex items-center justify-center lg:translate-x-4">
           <div className="w-full h-full relative bg-transparent">
             <EarthGlobe
               hotspots={hotspots}
@@ -152,14 +167,11 @@ export const Hero: React.FC<HeroProps> = ({
       </div>
 
       {/* Atmospheric Biome Indicator & Wallpaper Selector (Floating at Bottom) */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/80 shadow-lg text-xs text-[#0B3A4A]">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-[#1FB6C9]/20 shadow-md text-xs text-[#0B3A4A]">
         <div className="flex items-center gap-1.5">
           <Wind className="w-3.5 h-3.5 text-[#1FB6C9]" />
           <span className="text-[11px] font-semibold">
             Atmosphere: <strong className="text-[#0B3A4A]">{activeWallpaper.name}</strong>
-          </span>
-          <span className="text-[10px] text-[#6E8890] hidden sm:inline">
-            ({activeWallpaper.biome})
           </span>
         </div>
 

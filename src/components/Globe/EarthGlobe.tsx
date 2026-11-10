@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { createEarthTexture, createCloudTexture, latLngToVector3 } from './earthTexture';
 import { HotspotType, IncidentType } from '../../types';
-import { MapPin, X, ExternalLink, ChevronDown, ChevronUp, Scale, Building2, Newspaper } from 'lucide-react';
+import { MapPin, X, ExternalLink, ChevronDown, ChevronUp, Scale, Building2, Newspaper, Plus, Minus, RotateCcw } from 'lucide-react';
 
 export type SelectedMarkerData = 
   | { type: 'hotspot'; item: HotspotType }
@@ -26,7 +26,6 @@ interface ActivePopCardData {
   description: string;
   posX: number;
   posY: number;
-  // Specific to incident
   seizureQuantity?: string;
   sourceOrganization?: string;
   newsArticleTitle?: string;
@@ -34,25 +33,25 @@ interface ActivePopCardData {
   isExpanded?: boolean;
 }
 
-// 3D Billboard label sprites right on the Earth
-function createLabelSprite(text: string, color: string): THREE.Sprite {
+// 3D Billboard label sprites right on the Earth (crisp, high-contrast)
+function createLabelSprite(text: string, borderColor: string, bgColor: string): THREE.Sprite {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-  canvas.width = 320;
-  canvas.height = 70;
+  canvas.width = 340;
+  canvas.height = 76;
   ctx.font = 'bold 24px Manrope, sans-serif';
   const textWidth = ctx.measureText(text).width;
-  const pillW = Math.min(290, textWidth + 32);
-  const pillH = 42;
+  const pillW = Math.min(310, textWidth + 36);
+  const pillH = 46;
   const startX = (canvas.width - pillW) / 2;
   const startY = (canvas.height - pillH) / 2;
 
   // Background pill
-  ctx.fillStyle = 'rgba(11, 58, 74, 0.92)';
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2.5;
+  ctx.fillStyle = bgColor;
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
-  ctx.roundRect(startX, startY, pillW, pillH, 20);
+  ctx.roundRect(startX, startY, pillW, pillH, 22);
   ctx.fill();
   ctx.stroke();
 
@@ -70,8 +69,8 @@ function createLabelSprite(text: string, color: string): THREE.Sprite {
     transparent: true
   });
   const sprite = new THREE.Sprite(spriteMat);
-  sprite.scale.set(0.36, 0.08, 1);
-  sprite.position.y = 0.08;
+  sprite.scale.set(0.42, 0.095, 1);
+  sprite.position.y = 0.11;
   return sprite;
 }
 
@@ -86,7 +85,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   onRotationChangeRef.current = onRotationChange;
   const lastWpIndexRef = useRef<number>(0);
 
-  // Dynamic pop card positioned near clicked marker (Prompt Requirement: opens on CLICK, not hover, and positioned dynamically near marker)
+  // Dynamic pop card positioned near clicked marker (Opens on CLICK, not hover)
   const [activePopCard, setActivePopCard] = useState<ActivePopCardData | null>(null);
 
   // Minimal pin title tag under cursor on hover
@@ -114,15 +113,17 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2(-999, -999));
   const rippleRingsRef = useRef<THREE.Mesh[]>([]);
 
-  // Drag Interaction State
+  // Drag & Zoom State
   const isDraggingRef = useRef<boolean>(false);
   const dragDistanceRef = useRef<number>(0);
   const previousMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const targetCameraDistanceRef = useRef<number>(3.3);
-  const currentCameraDistanceRef = useRef<number>(3.3);
+  
+  // Starting Camera Distance & Balanced Earth Size (User Request: "starting mein earth jada badi na ho is size ki ho")
+  const targetCameraDistanceRef = useRef<number>(3.65);
+  const currentCameraDistanceRef = useRef<number>(3.65);
   const targetRotationRef = useRef<{ x: number; y: number }>({ x: 0.22, y: -0.6 });
 
-  const GLOBE_RADIUS = 1.45;
+  const GLOBE_RADIUS = 1.38;
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -135,7 +136,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 0.25, currentCameraDistanceRef.current);
+    camera.position.set(0, 0.18, currentCameraDistanceRef.current);
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({
@@ -155,6 +156,8 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     earthGroupRef.current = earthGroup;
     earthGroup.rotation.x = targetRotationRef.current.x;
     earthGroup.rotation.y = targetRotationRef.current.y;
+    // Offset Earth slightly to the right (User Request: "thoda sa right mein ho")
+    earthGroup.position.x = 0.22;
 
     // Earth Sphere
     const earthGeometry = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
@@ -218,10 +221,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     earthGroup.add(incidentMarkersRef.current);
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xE4F4F5, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xE4F4F5, 0.85);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xFFFFFF, 1.85);
+    const sunLight = new THREE.DirectionalLight(0xFFFFFF, 1.9);
     sunLight.position.set(5, 3, 5);
     scene.add(sunLight);
 
@@ -247,7 +250,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           earthGroupRef.current.rotation.x += (targetRotationRef.current.x - earthGroupRef.current.rotation.x) * 0.04;
         }
 
-        // Notify rotation segment for background nature wallpaper synchronization
+        // Synchronize nature wallpaper segment
         const rotY = earthGroupRef.current.rotation.y;
         const normalized = ((rotY % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
         const wpIndex = Math.floor(normalized / ((Math.PI * 2) / 5)) % 5;
@@ -257,22 +260,23 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         }
       }
 
+      // Smooth Camera Zoom
       if (cameraRef.current) {
-        currentCameraDistanceRef.current += (targetCameraDistanceRef.current - currentCameraDistanceRef.current) * 0.1;
+        currentCameraDistanceRef.current += (targetCameraDistanceRef.current - currentCameraDistanceRef.current) * 0.12;
         cameraRef.current.position.z = currentCameraDistanceRef.current;
       }
 
       rippleRingsRef.current.forEach((ring, idx) => {
         const ringTime = time * 2.2 + idx * 0.4;
-        const scale = 1 + (ringTime % 1.6);
+        const scale = 1 + (ringTime % 1.7);
         ring.scale.set(scale, scale, 1);
         const material = ring.material as THREE.MeshBasicMaterial;
         if (material) {
-          material.opacity = Math.max(0, 0.8 - (ringTime % 1.6) * 0.5);
+          material.opacity = Math.max(0, 0.85 - (ringTime % 1.7) * 0.5);
         }
       });
 
-      // Hover Raycasting: ONLY changes cursor and shows tiny indicator tag, does NOT trigger the full pop card!
+      // Hover Raycasting: Highlights pin under cursor, does NOT trigger the full pop card!
       if (cameraRef.current && earthGroupRef.current) {
         raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
         const interactiveObjects = [
@@ -299,7 +303,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
               setHoveredMarkerTitle({
                 x: px,
                 y: py,
-                title: `${item.name} (Click to inspect)`,
+                title: `${item.name} • Click to inspect`,
                 type: 'hotspot'
               });
             } else if (hitObj.userData.markerType === 'incident') {
@@ -307,7 +311,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
               setHoveredMarkerTitle({
                 x: px,
                 y: py,
-                title: `${item.title} (Click to read news)`,
+                title: `${item.title} • Click to read news`,
                 type: 'incident'
               });
             }
@@ -344,7 +348,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
   }, []);
 
-  // Update Markers with 3D Name Labels on the Earth
+  // Update Markers: Bold, High-Visibility, Multi-Layered Red & Turquoise Pins (User Request: "red and bule properly visble nahi hai marks")
   useEffect(() => {
     while (hotspotMarkersRef.current.children.length > 0) {
       hotspotMarkersRef.current.remove(hotspotMarkersRef.current.children[0]);
@@ -354,7 +358,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     }
     rippleRingsRef.current = [];
 
-    // Hotspot Markers (Turquoise #1FB6C9) with 3D Name Labels on the Earth
+    // Hotspot Markers (Vivid Turquoise/Cyan #00E5FF & #1FB6C9)
     if (showHotspots) {
       hotspots.forEach(hotspot => {
         const markerGroup = new THREE.Group();
@@ -366,26 +370,33 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const normal = pos.clone().normalize();
         markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
-        // Core Pin
-        const pinGeo = new THREE.SphereGeometry(0.026, 16, 16);
-        const pinMat = new THREE.MeshBasicMaterial({ color: 0x1FB6C9 });
-        const pinMesh = new THREE.Mesh(pinGeo, pinMat);
-        pinMesh.position.y = 0.04;
-        markerGroup.add(pinMesh);
+        // Outer Vibrant Turquoise Sphere (Larger, High Visibility)
+        const outerPinGeo = new THREE.SphereGeometry(0.046, 16, 16);
+        const outerPinMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF });
+        const outerPinMesh = new THREE.Mesh(outerPinGeo, outerPinMat);
+        outerPinMesh.position.y = 0.055;
+        markerGroup.add(outerPinMesh);
+
+        // Inner Bright White Core (Gleams in 3D)
+        const innerCoreGeo = new THREE.SphereGeometry(0.024, 16, 16);
+        const innerCoreMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+        const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
+        innerCoreMesh.position.y = 0.055;
+        markerGroup.add(innerCoreMesh);
 
         // Stem
-        const stemGeo = new THREE.CylinderGeometry(0.005, 0.008, 0.04, 8);
-        const stemMat = new THREE.MeshBasicMaterial({ color: 0x2F7D58 });
+        const stemGeo = new THREE.CylinderGeometry(0.009, 0.012, 0.055, 8);
+        const stemMat = new THREE.MeshBasicMaterial({ color: 0x1FB6C9 });
         const stemMesh = new THREE.Mesh(stemGeo, stemMat);
-        stemMesh.position.y = 0.02;
+        stemMesh.position.y = 0.026;
         markerGroup.add(stemMesh);
 
         // Ripple Ring
-        const ringGeo = new THREE.RingGeometry(0.02, 0.04, 24);
+        const ringGeo = new THREE.RingGeometry(0.035, 0.075, 24);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0x52CFDF,
           transparent: true,
-          opacity: 0.75,
+          opacity: 0.85,
           side: THREE.DoubleSide
         });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
@@ -395,14 +406,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
         // 3D Name Label right at the mark on the Earth
         const shortName = hotspot.name.replace(' Hotspot', '');
-        const labelSprite = createLabelSprite(shortName, '#1FB6C9');
+        const labelSprite = createLabelSprite(shortName, '#00E5FF', 'rgba(7, 44, 56, 0.94)');
         markerGroup.add(labelSprite);
 
         hotspotMarkersRef.current.add(markerGroup);
       });
     }
 
-    // Incident Markers (Coral #FF7E6B) with 3D Name Labels on the Earth
+    // Incident Markers (Vivid Warning Crimson Red #FF2D55 & #FF3B30)
     if (showIncidents) {
       incidents.forEach(incident => {
         const markerGroup = new THREE.Group();
@@ -414,26 +425,33 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const normal = pos.clone().normalize();
         markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
-        // Coral Diamond Pin
-        const diamondGeo = new THREE.OctahedronGeometry(0.028, 0);
-        const diamondMat = new THREE.MeshBasicMaterial({ color: 0xFF7E6B });
+        // Outer Vivid Red Diamond Pin (Larger, High Visibility)
+        const diamondGeo = new THREE.OctahedronGeometry(0.052, 0);
+        const diamondMat = new THREE.MeshBasicMaterial({ color: 0xFF2D55 });
         const diamondMesh = new THREE.Mesh(diamondGeo, diamondMat);
-        diamondMesh.position.y = 0.045;
+        diamondMesh.position.y = 0.06;
         markerGroup.add(diamondMesh);
 
+        // Inner White Core
+        const innerCoreGeo = new THREE.SphereGeometry(0.024, 16, 16);
+        const innerCoreMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+        const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
+        innerCoreMesh.position.y = 0.06;
+        markerGroup.add(innerCoreMesh);
+
         // Stem
-        const stemGeo = new THREE.CylinderGeometry(0.005, 0.008, 0.04, 8);
-        const stemMat = new THREE.MeshBasicMaterial({ color: 0xE86350 });
+        const stemGeo = new THREE.CylinderGeometry(0.009, 0.012, 0.055, 8);
+        const stemMat = new THREE.MeshBasicMaterial({ color: 0xE83131 });
         const stemMesh = new THREE.Mesh(stemGeo, stemMat);
-        stemMesh.position.y = 0.02;
+        stemMesh.position.y = 0.026;
         markerGroup.add(stemMesh);
 
         // Warning Pulse Ring
-        const ringGeo = new THREE.RingGeometry(0.022, 0.044, 24);
+        const ringGeo = new THREE.RingGeometry(0.038, 0.085, 24);
         const ringMat = new THREE.MeshBasicMaterial({
-          color: 0xFF7E6B,
+          color: 0xFF3B30,
           transparent: true,
-          opacity: 0.8,
+          opacity: 0.9,
           side: THREE.DoubleSide
         });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
@@ -443,7 +461,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
         // 3D Name Label right at the mark on the Earth
         const shortIncidentName = incident.country + ' Seizure';
-        const labelSprite = createLabelSprite(shortIncidentName, '#FF7E6B');
+        const labelSprite = createLabelSprite(shortIncidentName, '#FF3B30', 'rgba(58, 8, 8, 0.94)');
         markerGroup.add(labelSprite);
 
         incidentMarkersRef.current.add(markerGroup);
@@ -501,15 +519,34 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     isDraggingRef.current = false;
   };
 
+  // Zoom Handling: Enhanced sensitivity and broader range (User Request: "earth zoom nahi ho pa rahi aache se")
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const zoomDelta = e.deltaY * 0.0015;
-    targetCameraDistanceRef.current = Math.max(2.1, Math.min(4.8, targetCameraDistanceRef.current + zoomDelta));
+    const zoomDelta = e.deltaY * 0.003;
+    targetCameraDistanceRef.current = Math.max(1.65, Math.min(5.2, targetCameraDistanceRef.current + zoomDelta));
   };
 
-  // Click Handler: ONLY on CLICK does the pop card appear (Prompt Requirement)
+  const handleZoomIn = () => {
+    targetCameraDistanceRef.current = Math.max(1.65, targetCameraDistanceRef.current - 0.45);
+  };
+
+  const handleZoomOut = () => {
+    targetCameraDistanceRef.current = Math.min(5.2, targetCameraDistanceRef.current + 0.45);
+  };
+
+  const handleReset = () => {
+    targetCameraDistanceRef.current = 3.65;
+    targetRotationRef.current = { x: 0.22, y: -0.6 };
+    if (earthGroupRef.current) {
+      earthGroupRef.current.rotation.x = 0.22;
+      earthGroupRef.current.rotation.y = -0.6;
+    }
+    setIsRotating(true);
+    setActivePopCard(null);
+  };
+
+  // Click Handler: ONLY on CLICK does the pop card appear (User Request: "pops cursor lejane per na aaye usper click karne per aaye")
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // If it was a drag, don't trigger click
     if (dragDistanceRef.current > 6) return;
     if (!containerRef.current || !cameraRef.current || !earthGroupRef.current) return;
 
@@ -538,7 +575,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         const px = ((screenPos.x + 1) / 2) * container.clientWidth;
         const py = ((-screenPos.y + 1) / 2) * container.clientHeight;
 
-        // Position pop card dynamically near the marker, safely clamped within container bounds
+        // Position pop card dynamically near the marker
         const cardWidth = 320;
         const cardHeight = 320;
         let targetX = px > container.clientWidth * 0.5 ? px - cardWidth - 20 : px + 24;
@@ -579,12 +616,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         }
       }
     } else {
-      // Clicked on empty space: close open pop card
       setActivePopCard(null);
     }
   };
 
-  // Jump to region helper
   const jumpToRegion = (lat: number, lng: number) => {
     const targetY = -(lng + 90) * (Math.PI / 180);
     const targetX = (lat) * (Math.PI / 180) * 0.6;
@@ -609,6 +644,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         onPointerLeave={handlePointerUp}
         onWheel={handleWheel}
         onClick={handleClick}
+        onDoubleClick={handleZoomIn}
       />
 
       {/* Direct pin title indicator under cursor on hover */}
@@ -618,13 +654,13 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           style={{ left: hoveredMarkerTitle.x, top: hoveredMarkerTitle.y }}
         >
           <div className="bg-[#0B3A4A]/95 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-lg border border-white/20 whitespace-nowrap flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${hoveredMarkerTitle.type === 'hotspot' ? 'bg-[#1FB6C9]' : 'bg-[#FF7E6B]'}`} />
+            <span className={`w-2 h-2 rounded-full ${hoveredMarkerTitle.type === 'hotspot' ? 'bg-[#00E5FF]' : 'bg-[#FF2D55]'}`} />
             <span>{hoveredMarkerTitle.title}</span>
           </div>
         </div>
       )}
 
-      {/* DYNAMIC POSITIONED POP CARD (Opens on CLICK, placed near clicked marker, distinct styling for Green vs Red) */}
+      {/* DYNAMIC POSITIONED POP CARD (Opens on CLICK, placed near clicked marker) */}
       {activePopCard && (
         <div
           className={`absolute z-30 transition-all duration-200 ease-out animate-in zoom-in-95 fade-in ${
@@ -633,10 +669,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           style={{ left: activePopCard.posX, top: activePopCard.posY }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* A. GREEN/TURQUOISE HOTSPOT POP CARD: Minimal & Pure (Just Pic, Name, 1-Line Description) */}
+          {/* A. GREEN/TURQUOISE HOTSPOT: Minimal & Focused (Pic, Name, 1-Line Description) */}
           {activePopCard.type === 'hotspot' && (
-            <div className="bg-white/95 backdrop-blur-md rounded-[26px] p-3.5 shadow-2xl border border-[#1FB6C9]/35 text-[#3A5A64]">
-              {/* Photo */}
+            <div className="bg-white/95 backdrop-blur-md rounded-[26px] p-3.5 shadow-2xl border border-[#00E5FF]/40 text-[#3A5A64]">
               <div className="relative h-36 w-full rounded-2xl overflow-hidden mb-2.5 bg-black/10">
                 <img
                   src={activePopCard.image}
@@ -658,7 +693,6 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 </div>
               </div>
 
-              {/* Name */}
               <h3 className="font-serif text-lg font-medium text-[#0B3A4A] leading-snug">
                 {activePopCard.title}
               </h3>
@@ -667,17 +701,15 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 <span className="truncate">{activePopCard.subtitle}</span>
               </p>
 
-              {/* Exact 1-Line Description (User Request: "baki ki just pic and name and 1 line discepition") */}
               <p className="text-xs text-[#3A5A64] mt-2 leading-relaxed line-clamp-1 border-t border-gray-100 pt-2 font-medium">
                 {activePopCard.description}
               </p>
             </div>
           )}
 
-          {/* B. RED/CORAL INCIDENT POP CARD: News & Seizure Intelligence with "Read More" Toggle */}
+          {/* B. RED/CORAL INCIDENT: News & Seizure Intelligence with "Read More" Toggle */}
           {activePopCard.type === 'incident' && (
-            <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-4 shadow-2xl border border-[#FF7E6B]/40 text-[#3A5A64] space-y-2.5">
-              {/* Header Image */}
+            <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-4 shadow-2xl border border-[#FF3B30]/40 text-[#3A5A64] space-y-2.5">
               <div className="relative h-36 w-full rounded-2xl overflow-hidden bg-black/10">
                 <img
                   src={activePopCard.image}
@@ -693,24 +725,22 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                   <X className="w-3 h-3" />
                 </button>
                 <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white bg-[#FF7E6B] shadow-sm">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white bg-[#FF3B30] shadow-sm">
                     Documented Seizure
                   </span>
                 </div>
               </div>
 
-              {/* Title & Location */}
               <div>
                 <h3 className="font-serif text-lg font-medium text-[#0B3A4A] leading-snug">
                   {activePopCard.title}
                 </h3>
                 <p className="text-[11px] text-[#6E8890] mt-0.5 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#FF7E6B] shrink-0" />
+                  <MapPin className="w-3 h-3 text-[#FF3B30] shrink-0" />
                   <span className="truncate">{activePopCard.subtitle}</span>
                 </p>
               </div>
 
-              {/* Seizure Metric Box */}
               <div className="p-2.5 rounded-xl bg-[#F7F2E7] border border-[#FF7E6B]/20 text-xs">
                 <span className="text-[9px] uppercase font-bold tracking-wider text-[#E86350] flex items-center gap-1">
                   <Scale className="w-3 h-3" /> Confiscated Volume
@@ -720,7 +750,6 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 </span>
               </div>
 
-              {/* News Headline Banner */}
               {activePopCard.newsArticleTitle && (
                 <div className="p-2 rounded-xl bg-[#0B3A4A]/5 border border-gray-100 text-[11px]">
                   <span className="text-[9px] uppercase font-bold text-[#6E8890] flex items-center gap-1">
@@ -732,7 +761,6 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 </div>
               )}
 
-              {/* Read More Expanded Section (User Request: "red walo mien read more so woh thoda bade hojaye") */}
               {activePopCard.isExpanded && (
                 <div className="pt-2 border-t border-gray-100 space-y-2 text-xs animate-in fade-in duration-200">
                   <div>
@@ -757,7 +785,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                         href={activePopCard.articleUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF7E6B] text-white text-[11px] font-semibold hover:bg-[#E86350] shadow-sm transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF3B30] text-white text-[11px] font-semibold hover:bg-[#E83131] shadow-sm transition-all"
                       >
                         Read Verified Source Report <ExternalLink className="w-3 h-3" />
                       </a>
@@ -766,7 +794,6 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 </div>
               )}
 
-              {/* Read More Toggle Button */}
               <button
                 onClick={() =>
                   setActivePopCard(prev => (prev ? { ...prev, isExpanded: !prev.isExpanded } : null))
@@ -781,7 +808,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       )}
 
-      {/* Layer Visibility & Quick Region Jumpers (Placed Top Right) */}
+      {/* Layer Visibility & Quick Region Jumpers (Top Right) */}
       <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
         <div className="bg-white/85 backdrop-blur-md p-1.5 rounded-full border border-[#1FB6C9]/25 shadow-sm flex items-center gap-1.5 text-xs">
           <button
@@ -792,7 +819,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 : 'text-gray-400'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-[#1FB6C9]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00E5FF]" />
             <span>Hotspots</span>
           </button>
           <button
@@ -803,7 +830,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
                 : 'text-gray-400'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-[#FF7E6B]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#FF2D55]" />
             <span>Seizures</span>
           </button>
         </div>
@@ -837,7 +864,32 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         </div>
       </div>
 
-      {/* Bottom Telemetry & Controls */}
+      {/* Prominent Zoom (+ / −) Controls on the Earth (User Request: "earth zoom nahi ho pa rahi aache se") */}
+      <div className="absolute right-4 bottom-4 z-20 flex flex-col items-center gap-1.5 bg-white/85 backdrop-blur-md p-1.5 rounded-full border border-gray-200 shadow-md">
+        <button
+          onClick={handleZoomIn}
+          className="w-8 h-8 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"
+          title="Zoom In"
+        >
+          <Plus className="w-4 h-4 text-[#0B3A4A]" />
+        </button>
+        <button
+          onClick={handleZoomOut}
+          className="w-8 h-8 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] flex items-center justify-center font-bold text-base shadow-sm transition-transform hover:scale-105 cursor-pointer"
+          title="Zoom Out"
+        >
+          <Minus className="w-4 h-4 text-[#0B3A4A]" />
+        </button>
+        <button
+          onClick={handleReset}
+          className="w-8 h-8 rounded-full bg-white hover:bg-[#E4F4F5] text-[#0B3A4A] flex items-center justify-center shadow-sm transition-transform hover:scale-105 cursor-pointer"
+          title="Reset Earth View"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-[#1FB6C9]" />
+        </button>
+      </div>
+
+      {/* Bottom Left Telemetry & Auto-Rotate Toggle */}
       <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
         <div className="bg-[#0B3A4A]/80 backdrop-blur-md text-[#E4F4F5] text-[10px] px-3 py-1 rounded-full border border-white/10 font-mono">
           {coords.lat >= 0 ? `${coords.lat}°N` : `${Math.abs(coords.lat)}°S`}, {coords.lng >= 0 ? `${coords.lng}°E` : `${Math.abs(coords.lng)}°W`}
