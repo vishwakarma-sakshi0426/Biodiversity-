@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@theme {
+  --color-turquoise: #1FB6C9;
+  --color-turquoise-dark: #1693A3;
+  --color-turquoise-light: #52CFDF;
+  --color-coral: #FF7E6B;
+  --color-coral-dark: #E86350;
+  --color-coral-light: #FFA193;
+  --color-palm: #2F7D58;
+  --color-palm-dark: #225C40;
+  --color-palm-light: #449B72;
+  --color-sand: #F7F2E7;
+  --color-sand-light: #FAF7F0;
+  --color-sand-dark: #EAE2D0;
+  --color-aqua-mist: #E4F4F5;
+  --color-marine: #0B3A4A;
+  --color-marine-deep: #06232D;
+  --color-marine-light: #165367;
+  --color-hero-cyan: #9BF0FB;
+  --color-body-text: #3A5A64;
+  --color-body-muted: #6E8890;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-body-text);
+    background-color: var(--color-sand);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-editorial {
+    font-family: var(--font-serif);
+  }
+}
+
+/* Coralis Organic Shapes & Utilities */
+.pebble-shape-1 {
+  border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
+}
+
+.pebble-shape-2 {
+  border-radius: 40% 60% 30% 70% / 60% 30% 70% 40%;
+}
+
+.arch-top {
+  border-top-left-radius: 120px;
+  border-top-right-radius: 120px;
+}
+
+.arch-card {
+  border-radius: 48px 48px 24px 24px;
+}
+
+.coral-glow {
+  box-shadow: 0 10px 30px -5px rgba(255, 126, 107, 0.35);
+}
+
+.turquoise-glow {
+  box-shadow: 0 10px 30px -5px rgba(31, 182, 201, 0.35);
+}
+
+.marine-glass {
+  background: rgba(11, 58, 74, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(155, 240, 251, 0.15);
+}
+
+.sand-glass {
+  background: rgba(247, 242, 231, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.mist-glass {
+  background: rgba(228, 244, 245, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(31, 182, 201, 0.15);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F2E7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1FB6C9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0B3A4A;
+}
+
+/* Subtle animations */
+@keyframes pulseSlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
